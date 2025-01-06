@@ -4,29 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="97546604-2be4-4e8a-8eaa-e22576b859d8" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/employee.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestion.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionEmplo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/mysql.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/projet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/tache.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/fr/isep/ye/projet_algo_jjx/hello-view.fxml" afterDir="false" />
-    </list>
+    <list default="true" id="97546604-2be4-4e8a-8eaa-e22576b859d8" name="更改" comment="commit message" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -115,6 +93,19 @@
       <option name="presentableId" value="Default" />
       <updated>1736030138719</updated>
     </task>
+    <task id="LOCAL-00001" summary="commit message">
+      <option name="closed" value="true" />
+      <created>1736159392918</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1736159392918</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="commit message" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit message" />
   </component>
 </project>
