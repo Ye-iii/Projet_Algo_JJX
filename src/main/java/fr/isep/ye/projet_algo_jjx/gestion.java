@@ -19,8 +19,10 @@ public class gestion extends Application {
         // 创建 "员工" 菜单
         Menu employeeMenu = new Menu("员工");
         MenuItem addEmployeeItem = new MenuItem("添加员工");
+        MenuItem deleteEmployeeItem = new MenuItem("删除员工");
+        MenuItem updateEmployeeItem = new MenuItem("修改员工信息");
         MenuItem viewEmployeesItem = new MenuItem("查看员工");
-        employeeMenu.getItems().addAll(addEmployeeItem, viewEmployeesItem);
+        employeeMenu.getItems().addAll(addEmployeeItem,deleteEmployeeItem,updateEmployeeItem, viewEmployeesItem);
 
         // 创建 "项目" 菜单
         Menu projectMenu = new Menu("项目");
@@ -42,17 +44,25 @@ public class gestion extends Application {
         root.setTop(menuBar);
 
         // 添加员工功能
-    //    VBox addEmployeeLayout = createAddEmployeeLayout();
+        VBox addEmployeeLayout = createAddEmployeeLayout();
         VBox addProjectLayout = createAddProjectLayout();
         VBox addTaskLayout = createAddTaskLayout();
 
         // 事件处理
-    //    addEmployeeItem.setOnAction(e -> root.setCenter(addEmployeeLayout));
+        addEmployeeItem.setOnAction(e -> root.setCenter(addEmployeeLayout));
         viewEmployeesItem.setOnAction(e -> root.setCenter(createViewEmployeesLayout()));
         addProjectItem.setOnAction(e -> root.setCenter(addProjectLayout));
         viewProjectsItem.setOnAction(e -> root.setCenter(createViewProjectsLayout()));
         addTaskItem.setOnAction(e -> root.setCenter(addTaskLayout));
         viewTasksItem.setOnAction(e -> root.setCenter(createViewTasksLayout()));
+
+        VBox deleteEmployeeLayout = createdeleteEmployeeLayout();
+
+        deleteEmployeeItem.setOnAction(e ->root.setCenter(deleteEmployeeLayout));
+
+        VBox updateEmployeeLayout = createupdateEmployeeLayout();
+
+        updateEmployeeItem.setOnAction(e ->root.setCenter(updateEmployeeLayout));
 
         Scene scene = new Scene(root, 600, 400);
         primaryStage.setScene(scene);
@@ -60,30 +70,112 @@ public class gestion extends Application {
         primaryStage.show();
     }
 
-     //创建添加员工的布局
-//    private VBox createAddEmployeeLayout() {
-//        TextField employeeNameField = new TextField();
-//        employeeNameField.setPromptText("员工姓名");
-//        TextField employeeEmailField = new TextField();
-//        employeeEmailField.setPromptText("员工电子邮件");
-//        Button addEmployeeButton = new Button("添加员工");
-//        addEmployeeButton.setOnAction(e -> {
-//            String name = employeeNameField.getText();
-//            String email = employeeEmailField.getText();
-//            employee employeeManager = new employee();
-//            try {
-//                employeeManager.addEmployee(name, email);
-//                employeeNameField.clear();
-//                employeeEmailField.clear();
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//            }
-//        });
-//
-//        return new VBox(employeeNameField, employeeEmailField, addEmployeeButton);
-//    }
-
     private mysql db = new mysql();
+     //创建添加员工的布局
+    private VBox createAddEmployeeLayout() {
+        TextField employeeIdField = new TextField();
+        employeeIdField.setPromptText("员工id");
+        TextField employeeNameField = new TextField();
+        employeeNameField.setPromptText("员工姓名");
+        TextField employeeEmailField = new TextField();
+        employeeEmailField.setPromptText("员工电子邮件");
+        Button addEmployeeButton = new Button("添加员工");
+        addEmployeeButton.setOnAction(e -> {
+            try {
+                String idText = employeeIdField.getText();
+                if (idText == null || idText.trim().isEmpty()) {
+                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                }
+
+                int id = Integer.parseInt(idText);
+                String nom = employeeNameField.getText();
+                String email = employeeEmailField.getText();
+
+                // 调用 GestionEmplo 的 addEmployee 方法
+                gestionEmplo gestionEmplo = new gestionEmplo(db);
+                gestionEmplo.addEmployee(id, nom, email);
+
+                System.out.println("Employee added successfully!");
+            } catch (NumberFormatException ex) {
+                System.err.println("Invalid ID format: " + ex.getMessage());
+            } catch (IllegalArgumentException ex) {
+                System.err.println("Error: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.err.println("Unexpected error: " + ex.getMessage());
+            }
+        });
+
+        return new VBox(employeeIdField, employeeNameField, employeeEmailField, addEmployeeButton);
+    }
+
+    private VBox createdeleteEmployeeLayout() {
+        TextField employeeIdField = new TextField();
+        employeeIdField.setPromptText("员工id");
+        Button deleteEmployeeButton = new Button("删除员工");
+        //Label messageLabel = new Label();弹出窗口显示执行结果
+        deleteEmployeeButton.setOnAction(e -> {
+            try {
+                String idText = employeeIdField.getText();
+                if (idText == null || idText.trim().isEmpty()) {
+                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                }
+
+                int id = Integer.parseInt(idText);
+
+                // 调用 GestionEmplo 的 addEmployee 方法
+                gestionEmplo gestionEmplo = new gestionEmplo(db);
+                gestionEmplo.deleteEmployee(id);
+
+                System.out.println("Employee deleted successfully!");
+            }catch (NumberFormatException ex) {
+                System.err.println("ID格式无效，请输入数字。");
+            } catch (IllegalArgumentException ex) {
+                System.err.println("Error: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.err.println("Unexpected error: " + ex.getMessage());
+            }
+        });
+        return new VBox(employeeIdField, deleteEmployeeButton);
+    }
+
+    private VBox createupdateEmployeeLayout() {
+        TextField employeeIdField = new TextField();
+        employeeIdField.setPromptText("员工id");
+        TextField employeeNameField = new TextField();
+        employeeNameField.setPromptText("员工新姓名");
+        TextField employeeEmailField = new TextField();
+        employeeEmailField.setPromptText("员工新邮箱");
+        Button updateEmployeeButton = new Button("修改信息");
+        //Label messageLabel = new Label();弹出窗口显示执行结果
+        updateEmployeeButton.setOnAction(e -> {
+            try {
+                String idText = employeeIdField.getText();
+                String newName = employeeNameField.getText();
+                String newEmail = employeeEmailField.getText();
+                if (idText == null || idText.trim().isEmpty()) {
+                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                }
+
+                int id = Integer.parseInt(idText);
+
+                // 调用 GestionEmplo 的 addEmployee 方法
+                gestionEmplo gestionEmplo = new gestionEmplo(db);
+                gestionEmplo.updateEmployee(id,newName,newEmail);
+
+
+                    System.out.println("Employee updated successfully!");
+            } catch (NumberFormatException ex) {
+                System.err.println("ID格式无效，请输入数字。");
+            } catch (IllegalArgumentException ex) {
+                System.err.println("Error: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.err.println("Unexpected error: " + ex.getMessage());
+            }
+        });
+        return new VBox(employeeIdField, employeeNameField, employeeEmailField, updateEmployeeButton);
+    }
+
+
     private VBox createViewEmployeesLayout() {
         TableView<employee> employeeTableView = new TableView<>();
 
@@ -104,7 +196,7 @@ public class gestion extends Application {
 
         gestionEmplo employeeManager = new gestionEmplo(db);
         try {
-            employeeManager.listEmployees(employeeTableView);
+            employeeManager.listEmployee(employeeTableView);
         } catch (SQLException ex) {
             ex.printStackTrace();
             employeeTableView.getItems().add(new employee(-1, "无法加载员工列表", ""));

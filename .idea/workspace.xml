@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="97546604-2be4-4e8a-8eaa-e22576b859d8" name="更改" comment="commit message" />
+    <list default="true" id="97546604-2be4-4e8a-8eaa-e22576b859d8" name="更改" comment="commit message">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/employee.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestion.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionEmplo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionEmplo.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +25,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Ye-iii&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Ye-iii/Projet_Algo_JJX",
+    "accountId": "d53ff18a-860b-481e-9a88-4764a4ea61bb"
+  }
+}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -42,6 +59,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/etude/ISEP/A1/algo_programmation/TP8_G11A_Jingjing&quot;,
     &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
@@ -50,7 +68,7 @@
     &quot;应用程序.mysql.executor&quot;: &quot;Run&quot;
   }
 }</component>
-  <component name="RunManager" selected="应用程序.mysql">
+  <component name="RunManager" selected="应用程序.gestion">
     <configuration name="gestion" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="fr.isep.ye.projet_algo_jjx.gestion" />
       <module name="Projet_Algo_JJX" />
@@ -79,8 +97,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="应用程序.mysql" />
         <item itemvalue="应用程序.gestion" />
+        <item itemvalue="应用程序.mysql" />
       </list>
     </recent_temporary>
   </component>
