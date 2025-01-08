@@ -1,6 +1,5 @@
 package fr.isep.ye.projet_algo_jjx;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

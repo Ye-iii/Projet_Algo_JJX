@@ -1,65 +1,46 @@
 package fr.isep.ye.projet_algo_jjx;
 
-import javafx.scene.control.ListView;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import java.util.Date;
+import java.util.List;
 
 public class projet {
-    public void addProject(String name, String groupe, String deadline) throws SQLException {
-        String sql = "INSERT INTO projects (name, groupe, deadline) VALUES (?, ?, ?)";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, groupe);
-            pstmt.setString(3, deadline);
-            pstmt.executeUpdate();
-        }
+    private int id;
+    private String name;
+    private String group;
+    private Date deadline;
+    private String status;
+    private List<String> members;
+
+    public projet(int id, String name, String group, Date deadline, String status,List<String> members) {
+        this.id = id;
+        this.name = name;
+        this.group = group;
+        this.deadline = deadline;
+        this.status = status;
+        this.members = members;
     }
 
-    public void updateProject(int id, String name, String groupe, String deadline) throws SQLException {
-        String sql = "UPDATE projects SET name = ?, groupe = ?, deadline = ? WHERE id = ?";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, groupe);
-            pstmt.setString(3, deadline);
-            pstmt.setInt(4, id);
-            pstmt.executeUpdate();
-        }
+    public int getId() {
+        return id;
     }
 
-    public void deleteProject(int id) throws SQLException {
-        String sql = "DELETE FROM projects WHERE id = ?";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-        }
+    public String getName() {
+        return name;
     }
-    public void listProjects(ListView<String> listView) throws SQLException {
-        String sql = "SELECT * FROM projects";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            listView.getItems().clear();
-            while (rs.next()) {
-                listView.getItems().add("ID: " + rs.getInt("id") + ", Name: " + rs.getString("name") + ", Group: " + rs.getString("groupe") + ", Deadline: " + rs.getDate("deadline"));
-            }
-        }
+
+    public String getGroup() {
+        return group;
     }
-    public void listTasks(javafx.scene.control.ListView<String> listView) throws SQLException {
-        String sql = "SELECT * FROM tasks";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            listView.getItems().clear();
-            while (rs.next()) {
-                listView.getItems().add("ID: " + rs.getInt("id") + ", Name: " + rs.getString("name") + ", Project ID: " + rs.getInt("project_id") + ", Priority: " + rs.getInt("priority") + ", Deadline: " + rs.getDate("deadline"));
-            }
-        }
+
+    public Date getDdl() {
+        return deadline;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public List<String> getMembers() {
+        return members;
     }
 }
