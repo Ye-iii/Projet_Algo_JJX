@@ -28,30 +28,42 @@ public class gestionEmplo {
         }
     }
 
-    public void deleteEmployee(int id) throws SQLException {
-        String checkSql = "SELECT COUNT(*) FROM employee WHERE id = ?";
-        String deleteSql = "DELETE FROM employee WHERE id = ?";
-        try (Connection conn = mysql.getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-             PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+    public void deleteEmployee(int employeeId) throws SQLException {
+        String checkEmployeeSQL = "SELECT COUNT(*) FROM employee WHERE id = ?";
+        String deleteEmployeeSQL = "DELETE FROM employee WHERE id = ?";
+        String deleteProjetEmployeeRelationSQL = "DELETE FROM employee_projet WHERE employee_id = ?";
 
-            // 检查是否存在该 ID
-            checkStmt.setInt(1, id);
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next() && rs.getInt(1) == 0) {
-                    // 显示提示，无该 ID
-                    showAlert(Alert.AlertType.WARNING, "删除失败", "没有找到员工 ID: " + id);
-                    return;
+        try (Connection conn = mysql.getConnection()) {
+            conn.setAutoCommit(false); // 开启事务
+
+            // 检查项目 ID 是否存在
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkEmployeeSQL)) {
+                checkStmt.setInt(1, employeeId);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) == 0) {
+                        throw new IllegalArgumentException("未找到指定的员工ID: " + employeeId);
+                    }
                 }
             }
 
-            // 执行删除操作
-            deleteStmt.setInt(1, id);
-            deleteStmt.executeUpdate();
-            showAlert(Alert.AlertType.INFORMATION, "删除成功", "员工 ID: " + id + " 已删除");
+            // 删除项目与员工的关联
+            try (PreparedStatement pstmt = conn.prepareStatement(deleteProjetEmployeeRelationSQL)) {
+                pstmt.setInt(1, employeeId);
+                pstmt.executeUpdate();
+            }
+
+            // 删除项目本身
+            try (PreparedStatement pstmt = conn.prepareStatement(deleteEmployeeSQL)) {
+                pstmt.setInt(1, employeeId);
+                pstmt.executeUpdate();
+            }
+
+            conn.commit(); // 提交事务
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         }
     }
-
     public void updateEmployee(int id, String name, String sexe, int age, String email) throws SQLException {
         String sql = "UPDATE employee SET nom = ?, sexe = ?, age = ?, email = ? WHERE id = ?";
         try (Connection conn = mysql.getConnection();

@@ -77,7 +77,7 @@ public class gestionProjet {
                                 id,
                                 rs.getString("nom"),
                                 rs.getString("groupe"),
-                                rs.getDate("deadline"),
+                                rs.getDate("deadline").toLocalDate(),
                                 rs.getString("statut"),
                                 new ArrayList<>() // 初始化成员列表
                         );
@@ -188,42 +188,50 @@ public class gestionProjet {
             pstmt.executeBatch(); // 执行批处理
         }
     }
+
+    public List<projet> getProjetsByStatus(String status) throws SQLException {
+        String query = "SELECT p.id AS projet_id, p.nom, p.groupe, p.deadline, p.statut, " +
+                "e.nom AS employee_name " +
+                "FROM projet p " +
+                "LEFT JOIN employee_projet ep ON p.id = ep.projet_id " +
+                "LEFT JOIN employee e ON ep.employee_id = e.id " +
+                "WHERE p.statut = ?";
+
+        Map<Integer, projet> projetMap = new HashMap<>();
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, status);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int projetId = rs.getInt("projet_id");
+
+                    // 如果项目未在 Map 中，创建并添加
+                    projet proj = projetMap.computeIfAbsent(projetId, id -> {
+                        try {
+                            return new projet(
+                                    id,
+                                    rs.getString("nom"),
+                                    rs.getString("groupe"),
+                                    rs.getDate("deadline").toLocalDate(),
+                                    rs.getString("statut"),
+                                    new ArrayList<>() // 初始化成员列表
+                            );
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+                    // 获取成员姓名并添加到项目的成员列表
+                    String employeeName = rs.getString("employee_name");
+                    if (employeeName != null) {
+                        proj.getMembers().add(employeeName);
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(projetMap.values());
+    }
+
 }
 
-
-
-//    public void updateProject(int id, String name, String groupe, String deadline) throws SQLException {
-//        String sql = "UPDATE projects SET name = ?, groupe = ?, deadline = ? WHERE id = ?";
-//        try (Connection conn = mysql.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//            pstmt.setString(1, name);
-//            pstmt.setString(2, groupe);
-//            pstmt.setString(3, deadline);
-//            pstmt.setInt(4, id);
-//            pstmt.executeUpdate();
-//        }
-//    }
-//
-//    public void deleteProject(int id) throws SQLException {
-//        String sql = "DELETE FROM projects WHERE id = ?";
-//        try (Connection conn = mysql.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//            pstmt.setInt(1, id);
-//            pstmt.executeUpdate();
-//        }
-//    }
-//
-
-
-//    public void listTasks(javafx.scene.control.ListView<String> listView) throws SQLException {
-//        String sql = "SELECT * FROM tasks";
-//        try (Connection conn = mysql.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql);
-//             ResultSet rs = pstmt.executeQuery()) {
-//            listView.getItems().clear();
-//            while (rs.next()) {
-//                listView.getItems().add("ID: " + rs.getInt("id") + ", Name: " + rs.getString("name") + ", Project ID: " + rs.getInt("project_id") + ", Priority: " + rs.getInt("priority") + ", Deadline: " + rs.getDate("deadline"));
-//            }
-//        }
-//    }
-//}

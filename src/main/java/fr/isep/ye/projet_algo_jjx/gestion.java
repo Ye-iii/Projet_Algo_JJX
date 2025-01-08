@@ -7,18 +7,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.control.ListView;
 import org.w3c.dom.Text;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.sql.Date;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,23 +44,35 @@ public class gestion extends Application {
         employeeMenu.getItems().addAll(addEmployeeItem, deleteEmployeeItem, updateEmployeeItem, viewEmployeesItem);
 
         // 创建 "项目" 菜单
-        Menu projectMenu = new Menu("项目");
+        Menu projetMenu = new Menu("项目");
         MenuItem addProjetItem = new MenuItem("添加项目");
-        MenuItem deleteProjetItem=new MenuItem("删除项目");
+        MenuItem deleteProjetItem = new MenuItem("删除项目");
         MenuItem updateProjetItem = new MenuItem("修改项目信息");
-        MenuItem viewProjectsItem = new MenuItem("查看项目");
-        projectMenu.getItems().addAll(addProjetItem, deleteProjetItem,updateProjetItem,viewProjectsItem);
+        MenuItem viewProjetsItem = new MenuItem("查看项目");
+        MenuItem kanbanMenuItem = new MenuItem("看板视图");
+        projetMenu.getItems().addAll(addProjetItem, deleteProjetItem, updateProjetItem, viewProjetsItem, kanbanMenuItem);
 
         // 创建 "任务" 菜单
-        Menu taskMenu = new Menu("任务");
+        Menu tacheMenu = new Menu("任务");
         MenuItem addTacheItem = new MenuItem("添加任务");
-        MenuItem deleteTacheItem=new MenuItem("删除项目");
+        MenuItem deleteTacheItem = new MenuItem("删除项目");
         MenuItem updateTacheItem = new MenuItem("修改任务信息");
         MenuItem viewTacheItem = new MenuItem("查看任务");
-        taskMenu.getItems().addAll(addTacheItem, deleteTacheItem,updateTacheItem,viewTacheItem);
+        tacheMenu.getItems().addAll(addTacheItem, deleteTacheItem, updateTacheItem, viewTacheItem);
+
+        Menu viewMenu = new Menu("视图");
+        MenuItem viewCalendarItem = new MenuItem("日历视图");
+        viewMenu.getItems().addAll(viewCalendarItem);
+        viewCalendarItem.setOnAction(e -> {
+            try {
+                showCalendarView(mysql.getConnection()); // 调用日历视图方法，并传入数据库连接
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         // 将菜单添加到菜单栏
-        menuBar.getMenus().addAll(employeeMenu, projectMenu, taskMenu);
+        menuBar.getMenus().addAll(employeeMenu, projetMenu, tacheMenu, viewMenu);
 
         // 主布局
         BorderPane root = new BorderPane();
@@ -75,29 +90,35 @@ public class gestion extends Application {
 
         VBox deleteEmployeeLayout = createdeleteEmployeeLayout();
         VBox deleteProjetLayout = createdeleteProjetLayout();
-        VBox deleteTacheLayout =createDeleteTacheLayout();
+        VBox deleteTacheLayout = createDeleteTacheLayout();
 
         deleteEmployeeItem.setOnAction(e -> root.setCenter(deleteEmployeeLayout));
-        deleteProjetItem.setOnAction(e->root.setCenter(deleteProjetLayout));
-        deleteTacheItem.setOnAction(e->root.setCenter(deleteTacheLayout));
+        deleteProjetItem.setOnAction(e -> root.setCenter(deleteProjetLayout));
+        deleteTacheItem.setOnAction(e -> root.setCenter(deleteTacheLayout));
 
         VBox updateEmployeeLayout = createupdateEmployeeLayout();
         VBox updateProjetLayout = createupdateProjetLayout();
-        VBox updateTacheLayout =createUpdateTacheLayout();
+        VBox updateTacheLayout = createUpdateTacheLayout();
 
         updateEmployeeItem.setOnAction(e -> root.setCenter(updateEmployeeLayout));
         updateProjetItem.setOnAction(e -> root.setCenter(updateProjetLayout));
-        updateTacheItem.setOnAction(e->root.setCenter(updateTacheLayout));
+        updateTacheItem.setOnAction(e -> root.setCenter(updateTacheLayout));
 
         viewEmployeesItem.setOnAction(e -> root.setCenter(createViewEmployeesLayout()));
-        viewProjectsItem.setOnAction(e -> root.setCenter(createViewProjetLayout()));
+        viewProjetsItem.setOnAction(e -> root.setCenter(createViewProjetLayout()));
         viewTacheItem.setOnAction(e -> root.setCenter(createViewTacheLayout()));
+        kanbanMenuItem.setOnAction(e -> root.setCenter(createKanbanWithTable()));
 
         Scene scene = new Scene(root, 700, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Management System");
         primaryStage.show();
     }
+
+    private Connection connection; // 假设你已经有数据库连接
+    private YearMonth currentYearMonth; // 当前显示的月份
+    private GridPane calendarGrid; // 日历网格
+    private DatePicker datePicker;
 
     private mysql db = new mysql();
 
@@ -109,6 +130,7 @@ public class gestion extends Application {
         textField.setMinWidth(200);
         return textField;
     }
+
     //创建添加员工的布局
     private VBox createAddEmployeeLayout() {
 
@@ -230,7 +252,7 @@ public class gestion extends Application {
                 String newSex = employeeSexField.getText();
                 String newAgetext = employeeAgeField.getText();
                 String newEmail = employeeEmailField.getText();
-                int newAge=Integer.parseInt(newAgetext);
+                int newAge = Integer.parseInt(newAgetext);
 
                 // 调用 GestionEmplo 的 addEmployee 方法
                 gestionEmplo gestionEmplo = new gestionEmplo(db);
@@ -256,7 +278,7 @@ public class gestion extends Application {
             }
 
         });
-        VBox layout = new VBox(10, employeeIdField,employeeIdLabel, employeeNameField, employeeSexField, employeeAgeField, employeeEmailField, updateEmployeeButton);
+        VBox layout = new VBox(10, employeeIdField, employeeIdLabel, employeeNameField, employeeSexField, employeeAgeField, employeeEmailField, updateEmployeeButton);
         layout.setPadding(new Insets(20)); // 设置内边距
         layout.setAlignment(Pos.CENTER); // 居中对齐
         return layout;
@@ -314,7 +336,7 @@ public class gestion extends Application {
         TextField projetGroupField = createTextField("项目小组");
         TextField projetDdlField = createTextField("项目截止时间 (YYYY-MM-DD)");
         ComboBox<String> projetStatusComboBox = new ComboBox<>();
-        projetStatusComboBox.getItems().addAll("未开始", "进行中", "已完成", "已取消");
+        projetStatusComboBox.getItems().addAll("待办", "进行中", "已完成");
         projetStatusComboBox.setPromptText("选择项目状态");
 
         Label instructions = new Label("按住 Ctrl/Cmd 或 Shift 键以多选员工");
@@ -382,7 +404,7 @@ public class gestion extends Application {
         });
 
         // 创建布局并返回
-        VBox layout = new VBox(10, projetIdField, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, instructions, new Label("项目成员:"),employeeListView, addProjetButton);
+        VBox layout = new VBox(10, projetIdField, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, instructions, new Label("项目成员:"), employeeListView, addProjetButton);
         layout.setPadding(new Insets(20)); // 设置内边距
         layout.setAlignment(Pos.CENTER);
         return layout;
@@ -442,7 +464,7 @@ public class gestion extends Application {
         TextField projetGroupField = createTextField("项目小组");
         TextField projetDdlField = createTextField("修改截止日期 (YYYY-MM-DD)");
         ComboBox<String> projetStatusComboBox = new ComboBox<>();
-        projetStatusComboBox.getItems().addAll("未开始","进行中", "已完成", "已取消");
+        projetStatusComboBox.getItems().addAll("待办", "进行中", "已完成");
         projetStatusComboBox.setPromptText("选择项目状态");
 
         ListView<String> employeeListView = new ListView<>();
@@ -483,7 +505,7 @@ public class gestion extends Application {
                         memberIds.add(selectedEmployeeId);
                     }
                 }
-                projetManager.updateProjet(id,newName,newGroup,newDdltext,newStatus, memberIds);
+                projetManager.updateProjet(id, newName, newGroup, newDdltext, newStatus, memberIds);
 
                 alertMessage = "项目信息已成功修改！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
@@ -504,7 +526,7 @@ public class gestion extends Application {
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
-        VBox layout = new VBox(10, projetIdField,projetIdLabel, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, employeeListView, updateProjetButton);
+        VBox layout = new VBox(10, projetIdField, projetIdLabel, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, employeeListView, updateProjetButton);
         layout.setPadding(new Insets(20)); // 设置内边距
         layout.setAlignment(Pos.CENTER); // 居中对齐
         return layout;
@@ -525,10 +547,10 @@ public class gestion extends Application {
 
         TableColumn<projet, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-                    Date deadline = data.getValue().getDdl();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // 你可以选择其他格式
-                    return new SimpleStringProperty(deadline != null ? dateFormat.format(deadline) : "无截止日期");
-                });
+            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
+        });
 
         TableColumn<projet, String> statusColumn = new TableColumn<>("Statut");
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -546,6 +568,7 @@ public class gestion extends Application {
             return new SimpleStringProperty(memberNames);
         });
 
+
         // 将所有列添加到表格中
         projetTableView.getColumns().addAll(idColumn, nameColumn, groupColumn, ddlColumn, statusColumn, memberColumn);
 
@@ -560,6 +583,7 @@ public class gestion extends Application {
 
         return new VBox(projetTableView);
     }
+
 
     // 创建添加任务的布局
     private VBox createAddTacheLayout() {
@@ -640,7 +664,7 @@ public class gestion extends Application {
                 }
 
                 // 调用添加任务的方法
-                gestionTache.addTache(id, name, deadline, category, description,selectedEmployeeIds, selectedProjetIds);
+                gestionTache.addTache(id, name, deadline, category, description, selectedEmployeeIds, selectedProjetIds);
 
                 alertMessage = "任务已成功添加！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
@@ -666,7 +690,7 @@ public class gestion extends Application {
             }
         });
 
-        VBox layout = new VBox(10, tacheIdField, tacheNameField, tacheDdlField, tacheCategField, tacheDescriptionArea,ps,
+        VBox layout = new VBox(10, tacheIdField, tacheNameField, tacheDdlField, tacheCategField, tacheDescriptionArea, ps,
                 new Label("分配员工:"), employeeListView,
                 new Label("属于项目:"), projetListView,
                 addTacheButton);
@@ -686,9 +710,17 @@ public class gestion extends Application {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn<tache, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-            Date deadline = data.getValue().getDdl();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // 你可以选择其他格式
-            return new SimpleStringProperty(deadline != null ? dateFormat.format(deadline) : "无截止日期");
+            Date deadline = (Date) data.getValue().getDdl(); // 获取 Date 类型的截止日期
+            if (deadline != null) {
+                // 将 java.util.Date 转换为 java.sql.Date
+                java.sql.Date sqlDate = new java.sql.Date(deadline.getTime());
+                // 如果需要将 sqlDate 转换为 LocalDate
+                LocalDate localDate = sqlDate.toLocalDate();
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 设置日期格式
+                return new SimpleStringProperty(localDate.format(dateFormat)); // 返回格式化后的字符串
+            } else {
+                return new SimpleStringProperty("无截止日期");
+            }
         });
         TableColumn<tache, Integer> categColumn = new TableColumn<>("Categorie");
         categColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -706,7 +738,7 @@ public class gestion extends Application {
             return new SimpleStringProperty(projets != null ? String.join(", ", projets) : "错误");
         });
 
-        tacheTableView.getColumns().addAll(idColumn, nameColumn, ddlColumn, categColumn, descripColumn,employeeNameColumn,projetNameColumn);
+        tacheTableView.getColumns().addAll(idColumn, nameColumn, ddlColumn, categColumn, descripColumn, employeeNameColumn, projetNameColumn);
 
         // 加载数据
         gestionTache gestionTache = new gestionTache(db);
@@ -719,7 +751,7 @@ public class gestion extends Application {
             tacheTableView.getItems().add(new tache(-1, "无法加载任务信息", null, "", "", new ArrayList<>(), new ArrayList<>()));
         }
 
-       return new VBox(tacheTableView);
+        return new VBox(tacheTableView);
     }
 
     private VBox createUpdateTacheLayout() {
@@ -818,7 +850,7 @@ public class gestion extends Application {
                 employeeListView.getSelectionModel().clearSelection();
                 projectListView.getSelectionModel().clearSelection();
 
-            }catch (NumberFormatException ex) {
+            } catch (NumberFormatException ex) {
                 alertMessage = "ID 格式无效，请输入数字。";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
@@ -831,7 +863,7 @@ public class gestion extends Application {
         });
 
         // 布局
-        VBox layout = new VBox(10, tacheIdField,tacheIdLabel,tacheNameField,tacheDdlField,tacheCategoryField,tacheDescriptionArea,ps,tacheEmployeeLabel,employeeListView,tacheProjetLabel,projectListView, updateTacheButton);
+        VBox layout = new VBox(10, tacheIdField, tacheIdLabel, tacheNameField, tacheDdlField, tacheCategoryField, tacheDescriptionArea, ps, tacheEmployeeLabel, employeeListView, tacheProjetLabel, projectListView, updateTacheButton);
         layout.setPadding(new Insets(20)); // 设置内边距
         layout.setAlignment(Pos.CENTER); // 居中对齐
         return layout;
@@ -881,7 +913,7 @@ public class gestion extends Application {
         });
 
         // 布局
-        VBox layout = new VBox(10, tacheIdLabel,tacheIdField, deleteTacheButton);
+        VBox layout = new VBox(10, tacheIdLabel, tacheIdField, deleteTacheButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
@@ -896,7 +928,222 @@ public class gestion extends Application {
         alert.showAndWait();
     }
 
+
+    private BorderPane createKanbanWithTable() {
+        BorderPane kanbanLayout = new BorderPane();
+        HBox kanbanColumns = new HBox(10); // 看板列容器
+
+        String[] statuses = {"未开始", "进行中", "已完成"};
+        gestionProjet projetManager = new gestionProjet(db);
+
+        for (String status : statuses) {
+            VBox column = new VBox(10);
+            column.setPadding(new Insets(10));
+            column.setStyle("-fx-background-color: lightgrey; -fx-border-color: black;");
+            column.setPrefWidth(200);
+
+            Label columnHeader = new Label(status);
+            columnHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+            column.getChildren().add(columnHeader);
+
+            try {
+                // 获取数据库中的项目列表
+                List<projet> projets = projetManager.getProjetsByStatus(status);
+                for (projet proj : projets) {
+                    Button projectButton = new Button(proj.getName());
+                    projectButton.setMaxWidth(Double.MAX_VALUE);
+
+                    // 点击事件，显示表格
+                    projectButton.setOnAction(e -> showProjetDetails(proj));
+
+                    column.getChildren().add(projectButton);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            kanbanColumns.getChildren().add(column);
+        }
+
+        kanbanLayout.setLeft(kanbanColumns);
+        return kanbanLayout;
+    }
+
+    private void showProjetDetails(projet proj) {
+        TableView<projet> projetTableView = new TableView<>();
+
+        TableColumn<projet, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<projet, String> nameColumn = new TableColumn<>("Nom");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<projet, String> groupColumn = new TableColumn<>("Groupe");
+        groupColumn.setCellValueFactory(new PropertyValueFactory<>("group"));
+
+        TableColumn<projet, String> ddlColumn = new TableColumn<>("Deadline");
+        ddlColumn.setCellValueFactory(data -> {
+            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
+        });
+
+        TableColumn<projet, String> membersColumn = new TableColumn<>("成员");
+        membersColumn.setCellValueFactory(data -> {
+            List<String> members = proj.getMembers();
+            return new SimpleStringProperty(members.isEmpty() ? "无成员" : String.join(", ", members));
+        });
+
+        projetTableView.getColumns().addAll(idColumn, nameColumn, groupColumn, ddlColumn, membersColumn);
+        projetTableView.getItems().add(proj);
+
+        Stage detailStage = new Stage();
+        detailStage.setTitle("项目详情");
+        detailStage.setScene(new Scene(new VBox(projetTableView), 600, 400));
+        detailStage.show();
+    }
+    private void showCalendarView(Connection connection) {
+        Stage calendarStage = new Stage(); // 创建新窗口
+        calendarStage.setTitle("项目截止日期日历");
+
+        // 创建 DatePicker，用于选择日期
+        datePicker = new DatePicker(LocalDate.now());
+        datePicker.setOnAction(e -> updateCalendar(connection, datePicker.getValue()));
+
+        // 创建日历视图
+        calendarGrid = new GridPane();
+        calendarGrid.setVgap(5); // 设置行间距
+        calendarGrid.setHgap(5); // 设置列间距
+
+        // 设置每列和每行的大小
+        for (int i = 0; i < 7; i++) { // 7列（星期日到星期六）
+            calendarGrid.getColumnConstraints().add(new ColumnConstraints(80)); // 每列宽度为80像素
+        }
+
+        for (int i = 0; i < 6; i++) { // 6行（最多需要6行来显示所有日期）
+            calendarGrid.getRowConstraints().add(new RowConstraints(50)); // 每行高度为50像素
+        }
+
+        // 创建布局
+        VBox vbox = new VBox(datePicker, calendarGrid);
+        Scene calendarScene = new Scene(vbox, 600, 400); // 修改窗口大小
+        calendarStage.setScene(calendarScene);
+        calendarStage.show();
+
+        // 初始更新日历
+        updateCalendar(connection, datePicker.getValue());
+    }
+
+    private void updateCalendar(Connection connection, LocalDate selectedDate) {
+        // 清空之前的日历内容
+        calendarGrid.getChildren().clear();
+
+        // 获取当前月份和年份
+        YearMonth yearMonth = YearMonth.from(selectedDate);
+        int dayOfWeek = yearMonth.atDay(1).getDayOfWeek().getValue(); // 获取每月第一天的星期几
+        int daysInMonth = yearMonth.lengthOfMonth();
+
+        // 添加日历标题
+        String[] headers = {"日", "一", "二", "三", "四", "五", "六"};
+        for (int i = 0; i < headers.length; i++) {
+            calendarGrid.add(new Label(headers[i]), i, 0); // 添加星期标题
+        }
+
+        // 存储截止日期和项目名称
+        Map<LocalDate, String> projectDeadlines = new HashMap<>();
+
+        // 从数据库获取项目数据并填充截止日期映射
+        String sql = "SELECT id, nom, deadline FROM projet"; // 假设这是你的项目表的SQL查询
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String name = rs.getString("nom");
+                LocalDate deadline = rs.getDate("deadline").toLocalDate(); // 将 java.sql.Date 转换为 LocalDate
+                projectDeadlines.put(deadline, name);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // 处理异常
+        }
+
+        // 填充日历日期
+        for (int day = 1; day <= daysInMonth; day++) {
+            LocalDate currentDate = LocalDate.of(yearMonth.getYear(), yearMonth.getMonth(), day);
+            String projectInfo = projectDeadlines.get(currentDate); // 获取对应的项目名称
+
+            Label dateLabel = new Label(day + (projectInfo != null ? "\n" + projectInfo : "")); // 显示日期和项目名称
+            calendarGrid.add(dateLabel, (dayOfWeek - 1 + day) % 7, (day + dayOfWeek - 1) / 7 + 1); // 计算行和列
+        }
+    }
     public static void main(String[] args) {
         launch(args);
     }
 }
+
+
+
+//    private void showCalendarView(Connection connection) {
+//        Stage calendarStage = new Stage(); // 创建新窗口
+//        calendarStage.setTitle("项目截止日期日历");
+//
+//        // 获取当前月份
+//        LocalDate now = LocalDate.now();
+//        YearMonth yearMonth = YearMonth.of(now.getYear(), now.getMonth());
+//
+//        // 创建日历视图
+//        GridPane calendarGrid = new GridPane();
+//        calendarGrid.setVgap(5); // 设置行间距
+//        calendarGrid.setHgap(5); // 设置列间距
+//
+//        // 设置每列和每行的大小
+//        for (int i = 0; i < 7; i++) { // 7列（星期日到星期六）
+//            calendarGrid.getColumnConstraints().add(new ColumnConstraints(80)); // 每列宽度为80像素
+//        }
+//
+//        for (int i = 0; i < 6; i++) { // 6行（最多需要6行来显示所有日期）
+//            calendarGrid.getRowConstraints().add(new RowConstraints(50)); // 每行高度为50像素
+//        }
+//
+//        // 存储截止日期和项目名称
+//        Map<LocalDate, String> projectDeadlines = new HashMap<>();
+//
+//        // 从数据库获取项目数据并填充截止日期映射
+//        String sql = "SELECT id, nom, deadline FROM projet"; // 假设这是你的项目表的SQL查询
+//
+//        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+//             ResultSet rs = pstmt.executeQuery()) {
+//
+//            while (rs.next()) {
+//                String name = rs.getString("nom");
+//                LocalDate deadline = rs.getDate("deadline").toLocalDate(); // 将 java.sql.Date 转换为 LocalDate
+//                projectDeadlines.put(deadline, name);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace(); // 处理异常
+//        }
+//
+//        // 填充日历网格
+//        int dayOfWeek = yearMonth.atDay(1).getDayOfWeek().getValue(); // 获取每月第一天的星期几
+//        int daysInMonth = yearMonth.lengthOfMonth();
+//
+//        // 添加日历标题
+//        String[] headers = {"日", "一", "二", "三", "四", "五", "六"};
+//        for (int i = 0; i < headers.length; i++) {
+//            calendarGrid.add(new Label(headers[i]), i, 0); // 添加星期标题
+//        }
+//
+//        // 填充日历日期
+//        for (int day = 1; day <= daysInMonth; day++) {
+//            LocalDate currentDate = LocalDate.of(now.getYear(), now.getMonth(), day);
+//            String projectInfo = projectDeadlines.get(currentDate); // 获取对应的项目名称
+//
+//            Label dateLabel = new Label(day + (projectInfo != null ? "\n" + projectInfo : "")); // 显示日期和项目名称
+//            calendarGrid.add(dateLabel, (dayOfWeek - 1 + day) % 7, (day + dayOfWeek - 1) / 7 + 1); // 计算行和列
+//        }
+//
+//        // 创建布局并添加日历视图
+//        Scene calendarScene = new Scene(calendarGrid, 600, 400); // 修改窗口大小
+//        calendarStage.setScene(calendarScene);
+//        calendarStage.show();
+//    }
