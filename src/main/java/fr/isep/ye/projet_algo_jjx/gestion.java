@@ -7,26 +7,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.control.ListView;
-import org.w3c.dom.Text;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.sql.Date;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class gestion extends Application {
     @Override
@@ -55,7 +47,7 @@ public class gestion extends Application {
         // 创建 "任务" 菜单
         Menu tacheMenu = new Menu("任务");
         MenuItem addTacheItem = new MenuItem("添加任务");
-        MenuItem deleteTacheItem = new MenuItem("删除项目");
+        MenuItem deleteTacheItem = new MenuItem("删除任务");
         MenuItem updateTacheItem = new MenuItem("修改任务信息");
         MenuItem viewTacheItem = new MenuItem("查看任务");
         tacheMenu.getItems().addAll(addTacheItem, deleteTacheItem, updateTacheItem, viewTacheItem);
@@ -65,7 +57,7 @@ public class gestion extends Application {
         viewMenu.getItems().addAll(viewCalendarItem);
         viewCalendarItem.setOnAction(e -> {
             try {
-                showCalendarView(mysql.getConnection()); // 调用日历视图方法，并传入数据库连接
+                viewCalendar(mysql.getConnection()); // 调用日历视图方法，并传入数据库连接
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -80,34 +72,35 @@ public class gestion extends Application {
         root.setCenter(bienvenue);
 
         // 添加员工功能
-        VBox addEmployeeLayout = createAddEmployeeLayout();
-        VBox addProjetLayout = createAddProjetLayout();
-        VBox addTacheLayout = createAddTacheLayout();
+        VBox addEmployeeLayout = addEmployeeModule();
+        VBox addProjetLayout = addProjetModule();
+        VBox addTacheLayout = addTacheModule();
         // 事件处理
         addEmployeeItem.setOnAction(e -> root.setCenter(addEmployeeLayout));
         addProjetItem.setOnAction(e -> root.setCenter(addProjetLayout));
         addTacheItem.setOnAction(e -> root.setCenter(addTacheLayout));
 
-        VBox deleteEmployeeLayout = createdeleteEmployeeLayout();
-        VBox deleteProjetLayout = createdeleteProjetLayout();
-        VBox deleteTacheLayout = createDeleteTacheLayout();
+        VBox deleteEmployeeLayout = deleteEmployeeModule();
+        VBox deleteProjetLayout = deleteProjetModule();
+        VBox deleteTacheLayout = deleteTacheModule();
 
         deleteEmployeeItem.setOnAction(e -> root.setCenter(deleteEmployeeLayout));
         deleteProjetItem.setOnAction(e -> root.setCenter(deleteProjetLayout));
         deleteTacheItem.setOnAction(e -> root.setCenter(deleteTacheLayout));
 
-        VBox updateEmployeeLayout = createupdateEmployeeLayout();
-        VBox updateProjetLayout = createupdateProjetLayout();
-        VBox updateTacheLayout = createUpdateTacheLayout();
+        VBox updateEmployeeLayout = updateEmployeeModule();
+        VBox updateProjetLayout = updateProjetModule();
+        VBox updateTacheLayout = updateTacheModule();
 
         updateEmployeeItem.setOnAction(e -> root.setCenter(updateEmployeeLayout));
         updateProjetItem.setOnAction(e -> root.setCenter(updateProjetLayout));
         updateTacheItem.setOnAction(e -> root.setCenter(updateTacheLayout));
 
-        viewEmployeesItem.setOnAction(e -> root.setCenter(createViewEmployeesLayout()));
-        viewProjetsItem.setOnAction(e -> root.setCenter(createViewProjetLayout()));
-        viewTacheItem.setOnAction(e -> root.setCenter(createViewTacheLayout()));
-        kanbanMenuItem.setOnAction(e -> root.setCenter(createKanbanWithTable()));
+        viewEmployeesItem.setOnAction(e -> root.setCenter(viewEmployeesModule()));
+        viewProjetsItem.setOnAction(e -> root.setCenter(viewProjetModule()));
+        viewTacheItem.setOnAction(e -> root.setCenter(viewTacheModule()));
+        kanbanMenuItem.setOnAction(e -> root.setCenter(viewKanbanModule()));
+
 
         Scene scene = new Scene(root, 700, 600);
         primaryStage.setScene(scene);
@@ -115,8 +108,7 @@ public class gestion extends Application {
         primaryStage.show();
     }
 
-    private Connection connection; // 假设你已经有数据库连接
-    private YearMonth currentYearMonth; // 当前显示的月份
+
     private GridPane calendarGrid; // 日历网格
     private DatePicker datePicker;
 
@@ -132,7 +124,7 @@ public class gestion extends Application {
     }
 
     //创建添加员工的布局
-    private VBox createAddEmployeeLayout() {
+    private VBox addEmployeeModule() {
 
         TextField employeeIdField = createTextField("员工ID");
         TextField employeeNameField = createTextField("姓名");
@@ -188,7 +180,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createdeleteEmployeeLayout() {
+    private VBox deleteEmployeeModule() {
         Label employeeIdLabel = new Label("员工id:");
         TextField employeeIdField = createTextField("");
 
@@ -230,7 +222,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createupdateEmployeeLayout() {
+    private VBox updateEmployeeModule() {
         Label employeeIdLabel = new Label("PS: 员工ID不能修改: ");
         TextField employeeIdField = createTextField("员工ID");
         TextField employeeNameField = createTextField("修改姓名");
@@ -239,7 +231,6 @@ public class gestion extends Application {
         TextField employeeEmailField = createTextField("修改邮箱");
 
         Button updateEmployeeButton = new Button("修改信息");
-        //Label messageLabel = new Label();弹出窗口显示执行结果
         updateEmployeeButton.setOnAction(e -> {
             String alertMessage = null;
             try {
@@ -285,7 +276,7 @@ public class gestion extends Application {
     }
 
 
-    private VBox createViewEmployeesLayout() {
+    private VBox viewEmployeesModule() {
         TableView<employee> employeeTableView = new TableView<>();
         TableColumn<employee, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -326,7 +317,7 @@ public class gestion extends Application {
     }
 
     // 创建添加项目的布局
-    private VBox createAddProjetLayout() {
+    private VBox addProjetModule() {
         // 创建 gestionProjet 的实例
         gestionProjet projetManager = new gestionProjet(db);
 
@@ -372,7 +363,7 @@ public class gestion extends Application {
                 List<Integer> selectedMemberIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
                     // 通过员工姓名获取员工ID
-                    int selectedEmployeeId = projetManager.getEmployeeIdByName(employeeName); // 获取员工ID
+                    int selectedEmployeeId = projetManager.getEmployeeId(employeeName); // 获取员工ID
                     if (selectedEmployeeId != -1) {
                         selectedMemberIds.add(selectedEmployeeId);
                     }
@@ -410,7 +401,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createdeleteProjetLayout() {
+    private VBox deleteProjetModule() {
         Label projetIdLabel = new Label("项目id:");
         TextField projetIdField = createTextField("");
 
@@ -455,7 +446,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createupdateProjetLayout() {
+    private VBox updateProjetModule() {
         gestionProjet projetManager = new gestionProjet(db);
 
         Label projetIdLabel = new Label("PS: 项目ID不能修改: ");
@@ -500,7 +491,7 @@ public class gestion extends Application {
 
                 List<Integer> memberIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
-                    int selectedEmployeeId = projetManager.getEmployeeIdByName(employeeName);
+                    int selectedEmployeeId = projetManager.getEmployeeId(employeeName);
                     if (selectedEmployeeId != -1) {
                         memberIds.add(selectedEmployeeId);
                     }
@@ -532,7 +523,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createViewProjetLayout() {
+    private VBox viewProjetModule() {
         TableView<projet> projetTableView = new TableView<>();
 
         // 定义各个列
@@ -584,9 +575,8 @@ public class gestion extends Application {
         return new VBox(projetTableView);
     }
 
-
     // 创建添加任务的布局
-    private VBox createAddTacheLayout() {
+    private VBox addTacheModule() {
 
         gestionTache gestionTache = new gestionTache(db);
 
@@ -652,14 +642,14 @@ public class gestion extends Application {
                 // 获取选中的员工ID
                 List<Integer> selectedEmployeeIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
-                    int employeeId = gestionTache.getEmployeeIdByName(employeeName); // 假设有这个方法获取员工ID
+                    int employeeId = gestionTache.getEmployeeId(employeeName); // 假设有这个方法获取员工ID
                     selectedEmployeeIds.add(employeeId);
                 }
 
                 // 获取选中的项目ID
                 List<Integer> selectedProjetIds = new ArrayList<>();
                 for (String projetName : projetListView.getSelectionModel().getSelectedItems()) {
-                    int projetId = gestionTache.getProjetIdByName(projetName); // 假设有这个方法获取项目ID
+                    int projetId = gestionTache.getProjetId(projetName); // 假设有这个方法获取项目ID
                     selectedProjetIds.add(projetId);
                 }
 
@@ -700,27 +690,19 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createViewTacheLayout() {
-
+    private VBox viewTacheModule() {
         TableView<tache> tacheTableView = new TableView<>();
         // 定义各个列
         TableColumn<tache, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         TableColumn<tache, Integer> nameColumn = new TableColumn<>("Nom");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
         TableColumn<tache, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-            Date deadline = (Date) data.getValue().getDdl(); // 获取 Date 类型的截止日期
-            if (deadline != null) {
-                // 将 java.util.Date 转换为 java.sql.Date
-                java.sql.Date sqlDate = new java.sql.Date(deadline.getTime());
-                // 如果需要将 sqlDate 转换为 LocalDate
-                LocalDate localDate = sqlDate.toLocalDate();
-                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 设置日期格式
-                return new SimpleStringProperty(localDate.format(dateFormat)); // 返回格式化后的字符串
-            } else {
-                return new SimpleStringProperty("无截止日期");
-            }
+            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
         });
         TableColumn<tache, Integer> categColumn = new TableColumn<>("Categorie");
         categColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -742,19 +724,36 @@ public class gestion extends Application {
 
         // 加载数据
         gestionTache gestionTache = new gestionTache(db);
+
+        loadData(tacheTableView, gestionTache, "id");
+
+        // 创建排序按钮
+        Button sortByIdButton = new Button("按 ID 排序");
+        Button sortByDeadlineButton = new Button("按 Deadline 排序");
+
+        // 按钮事件绑定
+        sortByIdButton.setOnAction(event -> loadData(tacheTableView, gestionTache, "id"));
+        sortByDeadlineButton.setOnAction(event -> loadData(tacheTableView, gestionTache, "deadline"));
+
+        // 布局设置
+        HBox buttonBox = new HBox(10, sortByIdButton, sortByDeadlineButton);
+        VBox layout = new VBox(10, buttonBox, tacheTableView);
+        layout.setPadding(new Insets(10));
+
+        return layout;
+    }
+    private void loadData(TableView<tache> tacheTableView, gestionTache gestionTache, String order) {
+        tacheTableView.getItems().clear();
         try {
-            List<tache> taches = gestionTache.listTache();
-            System.out.println("Loaded tasks: " + taches.size());
+            List<tache> taches = gestionTache.listTache(order);
             tacheTableView.getItems().addAll(taches);
         } catch (SQLException ex) {
             ex.printStackTrace();
             tacheTableView.getItems().add(new tache(-1, "无法加载任务信息", null, "", "", new ArrayList<>(), new ArrayList<>()));
         }
-
-        return new VBox(tacheTableView);
     }
 
-    private VBox createUpdateTacheLayout() {
+    private VBox updateTacheModule() {
         gestionTache tacheManager = new gestionTache(db);
         // 标签和输入框
         Label tacheIdLabel = new Label("PS: 任务ID不能修改");
@@ -823,7 +822,7 @@ public class gestion extends Application {
 
                 List<Integer> employeeIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
-                    int employeeId = tacheManager.getEmployeeIdByName(employeeName);
+                    int employeeId = tacheManager.getEmployeeId(employeeName);
                     if (employeeId != -1) {
                         employeeIds.add(employeeId);
                     }
@@ -831,7 +830,7 @@ public class gestion extends Application {
 
                 List<Integer> projectIds = new ArrayList<>();
                 for (String projectName : projectListView.getSelectionModel().getSelectedItems()) {
-                    int projectId = tacheManager.getProjetIdByName(projectName);
+                    int projectId = tacheManager.getProjetId(projectName);
                     if (projectId != -1) {
                         projectIds.add(projectId);
                     }
@@ -869,7 +868,7 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox createDeleteTacheLayout() {
+    private VBox deleteTacheModule() {
         gestionTache tacheManager = new gestionTache(db);
 
         // 输入任务 ID 的文本框
@@ -929,11 +928,11 @@ public class gestion extends Application {
     }
 
 
-    private BorderPane createKanbanWithTable() {
+    private BorderPane viewKanbanModule() {
         BorderPane kanbanLayout = new BorderPane();
         HBox kanbanColumns = new HBox(10); // 看板列容器
 
-        String[] statuses = {"未开始", "进行中", "已完成"};
+        String[] statuses = {"待办", "进行中", "已完成"};
         gestionProjet projetManager = new gestionProjet(db);
 
         for (String status : statuses) {
@@ -948,7 +947,7 @@ public class gestion extends Application {
 
             try {
                 // 获取数据库中的项目列表
-                List<projet> projets = projetManager.getProjetsByStatus(status);
+                List<projet> projets = projetManager.getProjets(status);
                 for (projet proj : projets) {
                     Button projectButton = new Button(proj.getName());
                     projectButton.setMaxWidth(Double.MAX_VALUE);
@@ -1002,7 +1001,7 @@ public class gestion extends Application {
         detailStage.setScene(new Scene(new VBox(projetTableView), 600, 400));
         detailStage.show();
     }
-    private void showCalendarView(Connection connection) {
+    private void viewCalendar(Connection connection) {
         Stage calendarStage = new Stage(); // 创建新窗口
         calendarStage.setTitle("项目截止日期日历");
 
@@ -1080,70 +1079,3 @@ public class gestion extends Application {
         launch(args);
     }
 }
-
-
-
-//    private void showCalendarView(Connection connection) {
-//        Stage calendarStage = new Stage(); // 创建新窗口
-//        calendarStage.setTitle("项目截止日期日历");
-//
-//        // 获取当前月份
-//        LocalDate now = LocalDate.now();
-//        YearMonth yearMonth = YearMonth.of(now.getYear(), now.getMonth());
-//
-//        // 创建日历视图
-//        GridPane calendarGrid = new GridPane();
-//        calendarGrid.setVgap(5); // 设置行间距
-//        calendarGrid.setHgap(5); // 设置列间距
-//
-//        // 设置每列和每行的大小
-//        for (int i = 0; i < 7; i++) { // 7列（星期日到星期六）
-//            calendarGrid.getColumnConstraints().add(new ColumnConstraints(80)); // 每列宽度为80像素
-//        }
-//
-//        for (int i = 0; i < 6; i++) { // 6行（最多需要6行来显示所有日期）
-//            calendarGrid.getRowConstraints().add(new RowConstraints(50)); // 每行高度为50像素
-//        }
-//
-//        // 存储截止日期和项目名称
-//        Map<LocalDate, String> projectDeadlines = new HashMap<>();
-//
-//        // 从数据库获取项目数据并填充截止日期映射
-//        String sql = "SELECT id, nom, deadline FROM projet"; // 假设这是你的项目表的SQL查询
-//
-//        try (PreparedStatement pstmt = connection.prepareStatement(sql);
-//             ResultSet rs = pstmt.executeQuery()) {
-//
-//            while (rs.next()) {
-//                String name = rs.getString("nom");
-//                LocalDate deadline = rs.getDate("deadline").toLocalDate(); // 将 java.sql.Date 转换为 LocalDate
-//                projectDeadlines.put(deadline, name);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace(); // 处理异常
-//        }
-//
-//        // 填充日历网格
-//        int dayOfWeek = yearMonth.atDay(1).getDayOfWeek().getValue(); // 获取每月第一天的星期几
-//        int daysInMonth = yearMonth.lengthOfMonth();
-//
-//        // 添加日历标题
-//        String[] headers = {"日", "一", "二", "三", "四", "五", "六"};
-//        for (int i = 0; i < headers.length; i++) {
-//            calendarGrid.add(new Label(headers[i]), i, 0); // 添加星期标题
-//        }
-//
-//        // 填充日历日期
-//        for (int day = 1; day <= daysInMonth; day++) {
-//            LocalDate currentDate = LocalDate.of(now.getYear(), now.getMonth(), day);
-//            String projectInfo = projectDeadlines.get(currentDate); // 获取对应的项目名称
-//
-//            Label dateLabel = new Label(day + (projectInfo != null ? "\n" + projectInfo : "")); // 显示日期和项目名称
-//            calendarGrid.add(dateLabel, (dayOfWeek - 1 + day) % 7, (day + dayOfWeek - 1) / 7 + 1); // 计算行和列
-//        }
-//
-//        // 创建布局并添加日历视图
-//        Scene calendarScene = new Scene(calendarGrid, 600, 400); // 修改窗口大小
-//        calendarStage.setScene(calendarScene);
-//        calendarStage.show();
-//    }

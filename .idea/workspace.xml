@@ -6,10 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="97546604-2be4-4e8a-8eaa-e22576b859d8" name="更改" comment="commit message">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/HelloController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestion.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionEmplo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionEmplo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionProjet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionProjet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionTache.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/gestionTache.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/mysql.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/mysql.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/projet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/projet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/tache.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/fr/isep/ye/projet_algo_jjx/tache.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +74,7 @@
     &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
     &quot;应用程序.HelloApplication.executor&quot;: &quot;Run&quot;,
     &quot;应用程序.gestion.executor&quot;: &quot;Run&quot;,
     &quot;应用程序.mysql.executor&quot;: &quot;Run&quot;
@@ -139,7 +147,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736334239034</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="commit message">
+      <option name="closed" value="true" />
+      <created>1736356138820</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736356138820</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

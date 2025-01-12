@@ -1,14 +1,12 @@
 package fr.isep.ye.projet_algo_jjx;
 
-import javafx.scene.control.ListView;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 
@@ -60,7 +58,7 @@ public class gestionTache {
         }
     }
 
-    public int getEmployeeIdByName(String name) throws SQLException {
+    public int getEmployeeId(String name) throws SQLException {
         String sql = "SELECT id FROM employee WHERE nom = ?";
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -74,7 +72,7 @@ public class gestionTache {
         }
     }
 
-    public int getProjetIdByName(String name) throws SQLException {
+    public int getProjetId(String name) throws SQLException {
         String sql = "SELECT id FROM projet WHERE nom = ?";
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -150,8 +148,14 @@ public class gestionTache {
         }
     }
 
-    public List<tache> listTache() throws SQLException {
+    public List<tache> listTache(String order) throws SQLException {
         List<tache> taches = new ArrayList<>();
+
+        String orderByClause = "ORDER BY t.id ASC"; // 默认按 id 排序
+        if ("deadline".equalsIgnoreCase(order)) {
+            orderByClause = "ORDER BY t.deadline ASC"; // 按 deadline 排序
+        }
+
         String sql = "SELECT t.id AS tache_id, t.nom AS tache_nom, t.deadline, t.categorie, t.description, " +
                 "GROUP_CONCAT(DISTINCT e.nom) AS employee_nom, GROUP_CONCAT(DISTINCT p.nom) AS projet_nom " +
                 "FROM tache t " +
@@ -159,8 +163,7 @@ public class gestionTache {
                 "LEFT JOIN employee e ON te.employee_id = e.id " +
                 "LEFT JOIN tache_projet tp ON t.id = tp.tache_id " +
                 "LEFT JOIN projet p ON tp.projet_id = p.id " +
-                "GROUP BY t.id " +
-                "ORDER BY t.id;";
+                "GROUP BY t.id " + orderByClause;
 
         try (Connection conn = mysql.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -170,7 +173,7 @@ public class gestionTache {
                 // 直接通过 ResultSet 获取字段值
                 int tacheId = rs.getInt("tache_id");
                 String tacheName = rs.getString("tache_nom");
-                Date deadline = rs.getDate("deadline");
+                LocalDate deadline = rs.getDate("deadline").toLocalDate();
                 String category = rs.getString("categorie");
                 String description = rs.getString("description");
                 String employeeNameString = rs.getString("employee_nom");

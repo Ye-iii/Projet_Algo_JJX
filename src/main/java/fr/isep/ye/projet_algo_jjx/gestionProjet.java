@@ -1,6 +1,5 @@
 package fr.isep.ye.projet_algo_jjx;
 
-import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 
 import java.sql.Connection;
@@ -100,7 +99,7 @@ public class gestionProjet {
     }
 
 
-    public int getEmployeeIdByName(String employeeName) {
+    public int getEmployeeId(String employeeName) {
         String query = "SELECT id FROM employee WHERE nom = ?"; // 查询员工 ID 的 SQL 语句
         try (Connection conn = db.getConnection(); // 获取数据库连接
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -189,7 +188,7 @@ public class gestionProjet {
         }
     }
 
-    public List<projet> getProjetsByStatus(String status) throws SQLException {
+    public List<projet> getProjets(String status) throws SQLException {
         String query = "SELECT p.id AS projet_id, p.nom, p.groupe, p.deadline, p.statut, " +
                 "e.nom AS employee_name " +
                 "FROM projet p " +

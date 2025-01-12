@@ -1,6 +1,5 @@
 package fr.isep.ye.projet_algo_jjx;
 
-import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
 
 import java.sql.Connection;
@@ -113,11 +112,11 @@ public class gestionEmplo {
         return projet.length() > 0 ? projet.toString() : "无已完成项目";
     }
 
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+//    private void showAlert(Alert.AlertType alertType, String title, String message) {
+//        Alert alert = new Alert(alertType);
+//        alert.setTitle(title);
+//        alert.setHeaderText(null);
+//        alert.setContentText(message);
+//        alert.showAndWait();
+//    }
 }
