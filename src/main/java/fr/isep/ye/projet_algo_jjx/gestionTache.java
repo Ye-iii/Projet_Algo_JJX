@@ -23,12 +23,11 @@ public class gestionTache {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.setString(2, name);
-            pstmt.setString(3, deadline);// 将字符串转换为日期
+            pstmt.setString(3, deadline);
             pstmt.setString(4, category);
             pstmt.setString(5, description);
             pstmt.executeUpdate();
 
-            // 将任务与员工和项目关联
             for (int employeeId : employeeIds) {
                 addTacheEmployee(id, employeeId);
             }
@@ -67,7 +66,7 @@ public class gestionTache {
             if (rs.next()) {
                 return rs.getInt("id");
             } else {
-                throw new IllegalArgumentException("未找到员工: " + name);
+                throw new IllegalArgumentException("Employé introuvable: " + name);
             }
         }
     }
@@ -81,7 +80,7 @@ public class gestionTache {
             if (rs.next()) {
                 return rs.getInt("id");
             } else {
-                throw new IllegalArgumentException("未找到项目: " + name);
+                throw new IllegalArgumentException("Projet introuvable: " + name);
             }
         }
     }
@@ -95,10 +94,9 @@ public class gestionTache {
         String insertnewProjetSQL = "INSERT INTO tache_projet (tache_id, projet_id) VALUES (?, ?)";
 
         try (Connection conn = mysql.getConnection()) {
-            conn.setAutoCommit(false); // 开启事务
+            conn.setAutoCommit(false);
 
             try (PreparedStatement updateTacheStmt = conn.prepareStatement(updateTacheSQL)) {
-                // 更新 tache 表
                 updateTacheStmt.setString(1, name);
                 updateTacheStmt.setString(2, deadline);
                 updateTacheStmt.setString(3, category);
@@ -109,7 +107,6 @@ public class gestionTache {
 
             try (PreparedStatement deleteEmployeeStmt = conn.prepareStatement(deleteEmployeeSQL);
                  PreparedStatement deleteProjetStmt = conn.prepareStatement(deleteProjetSQL)) {
-                // 删除旧的关系
                 deleteEmployeeStmt.setInt(1, id);
                 deleteEmployeeStmt.executeUpdate();
 
@@ -117,43 +114,41 @@ public class gestionTache {
                 deleteProjetStmt.executeUpdate();
             }
 
-            // 插入新的员工关系
             if (employeeIds != null) {
                 try (PreparedStatement insertEmployeeStmt = conn.prepareStatement(insertnewEmployeeSQL)) {
-                    for (int employeeId : employeeIds) { // 遍历整数 ID 列表
-                        insertEmployeeStmt.setInt(1, id); // 任务 ID
-                        insertEmployeeStmt.setInt(2, employeeId); // 员工 ID
+                    for (int employeeId : employeeIds) {
+                        insertEmployeeStmt.setInt(1, id);
+                        insertEmployeeStmt.setInt(2, employeeId);
                         insertEmployeeStmt.addBatch();
                     }
                     insertEmployeeStmt.executeBatch();
                 }
             }
 
-// 插入新的项目关系
             if (projetIds != null) {
                 try (PreparedStatement insertProjetStmt = conn.prepareStatement(insertnewProjetSQL)) {
-                    for (int projetId : projetIds) { // 遍历整数 ID 列表
-                        insertProjetStmt.setInt(1, id); // 任务 ID
-                        insertProjetStmt.setInt(2, projetId); // 项目 ID
+                    for (int projetId : projetIds) {
+                        insertProjetStmt.setInt(1, id);
+                        insertProjetStmt.setInt(2, projetId);
                         insertProjetStmt.addBatch();
                     }
                     insertProjetStmt.executeBatch();
                 }
             }
 
-            conn.commit(); // 提交事务
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw e; // 如果失败，抛出异常
+            throw e;
         }
     }
 
     public List<tache> listTache(String order) throws SQLException {
         List<tache> taches = new ArrayList<>();
 
-        String orderByClause = "ORDER BY t.id ASC"; // 默认按 id 排序
+        String orderByClause = "ORDER BY t.id ASC";
         if ("deadline".equalsIgnoreCase(order)) {
-            orderByClause = "ORDER BY t.deadline ASC"; // 按 deadline 排序
+            orderByClause = "ORDER BY t.deadline ASC";
         }
 
         String sql = "SELECT t.id AS tache_id, t.nom AS tache_nom, t.deadline, t.categorie, t.description, " +
@@ -170,7 +165,6 @@ public class gestionTache {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                // 直接通过 ResultSet 获取字段值
                 int tacheId = rs.getInt("tache_id");
                 String tacheName = rs.getString("tache_nom");
                 LocalDate deadline = rs.getDate("deadline").toLocalDate();
@@ -178,13 +172,12 @@ public class gestionTache {
                 String description = rs.getString("description");
                 String employeeNameString = rs.getString("employee_nom");
                 List<String> employeeName = employeeNameString != null ?
-                        Arrays.asList(employeeNameString.split(",")) : new ArrayList<>(); // 转换为列表
-                // 以逗号分隔的员工姓名
-                String projectNamesString = rs.getString("projet_nom"); // 获取多个项目名称
+                        Arrays.asList(employeeNameString.split(",")) : new ArrayList<>();
+
+                String projectNamesString = rs.getString("projet_nom");
                 List<String> projetName = projectNamesString != null ?
                         Arrays.asList(projectNamesString.split(",")) : new ArrayList<>();
 
-                // 构建任务信息字符串
                 tache newTache = new tache(tacheId, tacheName, deadline, category, description, employeeName, projetName);
                 taches.add(newTache);
             }
@@ -199,37 +192,33 @@ public class gestionTache {
         String deleteTacheProjetRelationSQL = "DELETE FROM tache_projet WHERE tache_id = ?";
 
         try (Connection conn = mysql.getConnection()) {
-            conn.setAutoCommit(false); // 开启事务
+            conn.setAutoCommit(false);
 
-            // 检查任务 ID 是否存在
             try (PreparedStatement checkStmt = conn.prepareStatement(checkTacheSQL)) {
                 checkStmt.setInt(1, tacheId);
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next() && rs.getInt(1) == 0) {
-                        throw new IllegalArgumentException("未找到指定的任务ID: " + tacheId);
+                        throw new IllegalArgumentException("L'ID de la tâche spécifiée n'a pas été trouvé: " + tacheId);
                     }
                 }
             }
 
-            // 删除任务与员工的关联
             try (PreparedStatement pstmt = conn.prepareStatement(deleteTacheEmployeeRelationSQL)) {
                 pstmt.setInt(1, tacheId);
                 pstmt.executeUpdate();
             }
 
-            // 删除任务与项目的关联
             try (PreparedStatement pstmt = conn.prepareStatement(deleteTacheProjetRelationSQL)) {
                 pstmt.setInt(1, tacheId);
                 pstmt.executeUpdate();
             }
 
-            // 删除任务本身
             try (PreparedStatement pstmt = conn.prepareStatement(deleteTacheSQL)) {
                 pstmt.setInt(1, tacheId);
                 pstmt.executeUpdate();
             }
 
-            conn.commit(); // 提交事务
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;

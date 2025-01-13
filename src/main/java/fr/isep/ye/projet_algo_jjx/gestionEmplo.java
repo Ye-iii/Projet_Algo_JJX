@@ -33,31 +33,28 @@ public class gestionEmplo {
         String deleteProjetEmployeeRelationSQL = "DELETE FROM employee_projet WHERE employee_id = ?";
 
         try (Connection conn = mysql.getConnection()) {
-            conn.setAutoCommit(false); // 开启事务
+            conn.setAutoCommit(false);
 
-            // 检查项目 ID 是否存在
             try (PreparedStatement checkStmt = conn.prepareStatement(checkEmployeeSQL)) {
                 checkStmt.setInt(1, employeeId);
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next() && rs.getInt(1) == 0) {
-                        throw new IllegalArgumentException("未找到指定的员工ID: " + employeeId);
+                        throw new IllegalArgumentException("L'ID de l'employé spécifié n'a pas été trouvé: " + employeeId);
                     }
                 }
             }
 
-            // 删除项目与员工的关联
             try (PreparedStatement pstmt = conn.prepareStatement(deleteProjetEmployeeRelationSQL)) {
                 pstmt.setInt(1, employeeId);
                 pstmt.executeUpdate();
             }
 
-            // 删除项目本身
             try (PreparedStatement pstmt = conn.prepareStatement(deleteEmployeeSQL)) {
                 pstmt.setInt(1, employeeId);
                 pstmt.executeUpdate();
             }
 
-            conn.commit(); // 提交事务
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
@@ -77,11 +74,11 @@ public class gestionEmplo {
     }
 
     public void listEmployee(TableView<employee> tableView) throws SQLException {
-        String sql = "SELECT * FROM employee"; // 确保表名和字段名正确
+        String sql = "SELECT * FROM employee";
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-            tableView.getItems().clear(); // 清空当前列表项
+            tableView.getItems().clear();
             while (rs.next()) {
                 employee employee = new employee(
                         rs.getInt("id"),
@@ -97,7 +94,7 @@ public class gestionEmplo {
     public String employee_projet(int employeeId) throws SQLException {
         String query = "SELECT p.nom FROM projet p " +
                 "JOIN employee_projet ep ON p.id = ep.projet_id " +
-                "WHERE ep.employee_id = ? AND p.statut = '已完成'"; // 仅选择已完成的项目
+                "WHERE ep.employee_id = ? AND p.statut = 'Terminé'";
         PreparedStatement statement = db.getConnection().prepareStatement(query);
         statement.setInt(1, employeeId);
         ResultSet resultSet = statement.executeQuery();
@@ -109,14 +106,7 @@ public class gestionEmplo {
             }
             projet.append(resultSet.getString("nom"));
         }
-        return projet.length() > 0 ? projet.toString() : "无已完成项目";
+        return projet.length() > 0 ? projet.toString() : "Aucun projet terminé";
     }
 
-//    private void showAlert(Alert.AlertType alertType, String title, String message) {
-//        Alert alert = new Alert(alertType);
-//        alert.setTitle(title);
-//        alert.setHeaderText(null);
-//        alert.setContentText(message);
-//        alert.showAndWait();
-//    }
 }

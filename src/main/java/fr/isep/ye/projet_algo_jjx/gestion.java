@@ -19,63 +19,59 @@ import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Locale;
 
 public class gestion extends Application {
     @Override
     public void start(Stage primaryStage) {
-        // 创建菜单
+        Locale.setDefault(Locale.FRANCE);
         MenuBar menuBar = new MenuBar();
         Label bienvenue = new Label("Bonjour!");
 
-        // 创建 "员工" 菜单
-        Menu employeeMenu = new Menu("员工");
-        MenuItem addEmployeeItem = new MenuItem("添加员工");
-        MenuItem deleteEmployeeItem = new MenuItem("删除员工");
-        MenuItem updateEmployeeItem = new MenuItem("修改员工信息");
-        MenuItem viewEmployeesItem = new MenuItem("查看员工");
+        Menu employeeMenu = new Menu("Employé");
+        MenuItem addEmployeeItem = new MenuItem("Ajouter un employé");
+        MenuItem deleteEmployeeItem = new MenuItem("Supprimer un employé");
+        MenuItem updateEmployeeItem = new MenuItem("Modifier les informations sur les employés");
+        MenuItem viewEmployeesItem = new MenuItem("Visualisation des employés");
         employeeMenu.getItems().addAll(addEmployeeItem, deleteEmployeeItem, updateEmployeeItem, viewEmployeesItem);
 
-        // 创建 "项目" 菜单
-        Menu projetMenu = new Menu("项目");
-        MenuItem addProjetItem = new MenuItem("添加项目");
-        MenuItem deleteProjetItem = new MenuItem("删除项目");
-        MenuItem updateProjetItem = new MenuItem("修改项目信息");
-        MenuItem viewProjetsItem = new MenuItem("查看项目");
-        MenuItem kanbanMenuItem = new MenuItem("看板视图");
+        Menu projetMenu = new Menu("Projet");
+        MenuItem addProjetItem = new MenuItem("Ajouter un projet");
+        MenuItem deleteProjetItem = new MenuItem("Supprimer un projet");
+        MenuItem updateProjetItem = new MenuItem("Modifier les informations du projet");
+        MenuItem viewProjetsItem = new MenuItem("Visualisation des projets");
+        MenuItem kanbanMenuItem = new MenuItem("Vue Kanban");
         projetMenu.getItems().addAll(addProjetItem, deleteProjetItem, updateProjetItem, viewProjetsItem, kanbanMenuItem);
 
-        // 创建 "任务" 菜单
-        Menu tacheMenu = new Menu("任务");
-        MenuItem addTacheItem = new MenuItem("添加任务");
-        MenuItem deleteTacheItem = new MenuItem("删除任务");
-        MenuItem updateTacheItem = new MenuItem("修改任务信息");
-        MenuItem viewTacheItem = new MenuItem("查看任务");
+        Menu tacheMenu = new Menu("Tâches");
+        MenuItem addTacheItem = new MenuItem("Ajouter une tâche");
+        MenuItem deleteTacheItem = new MenuItem("Supprimer une tâche");
+        MenuItem updateTacheItem = new MenuItem("Modifier les informations sur les tâches");
+        MenuItem viewTacheItem = new MenuItem("Visualisation des tâches");
         tacheMenu.getItems().addAll(addTacheItem, deleteTacheItem, updateTacheItem, viewTacheItem);
 
-        Menu viewMenu = new Menu("视图");
-        MenuItem viewCalendarItem = new MenuItem("日历视图");
+        Menu viewMenu = new Menu("Vue");
+        MenuItem viewCalendarItem = new MenuItem("Vue du calendrier");
         viewMenu.getItems().addAll(viewCalendarItem);
         viewCalendarItem.setOnAction(e -> {
             try {
-                viewCalendar(mysql.getConnection()); // 调用日历视图方法，并传入数据库连接
+                viewCalendar(mysql.getConnection());
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        // 将菜单添加到菜单栏
         menuBar.getMenus().addAll(employeeMenu, projetMenu, tacheMenu, viewMenu);
 
-        // 主布局
+
         BorderPane root = new BorderPane();
         root.setTop(menuBar);
         root.setCenter(bienvenue);
 
-        // 添加员工功能
         VBox addEmployeeLayout = addEmployeeModule();
         VBox addProjetLayout = addProjetModule();
         VBox addTacheLayout = addTacheModule();
-        // 事件处理
+
         addEmployeeItem.setOnAction(e -> root.setCenter(addEmployeeLayout));
         addProjetItem.setOnAction(e -> root.setCenter(addProjetLayout));
         addTacheItem.setOnAction(e -> root.setCenter(addTacheLayout));
@@ -104,12 +100,12 @@ public class gestion extends Application {
 
         Scene scene = new Scene(root, 700, 600);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Management System");
+        primaryStage.setTitle("Système de gestion de projet");
         primaryStage.show();
     }
 
 
-    private GridPane calendarGrid; // 日历网格
+    private GridPane calendarGrid;
     private DatePicker datePicker;
 
     private mysql db = new mysql();
@@ -123,22 +119,21 @@ public class gestion extends Application {
         return textField;
     }
 
-    //创建添加员工的布局
+
     private VBox addEmployeeModule() {
+        TextField employeeIdField = createTextField("ID de l'employé");
+        TextField employeeNameField = createTextField("Nom");
+        TextField employeeSexField = createTextField("Sexe(H/F)");
+        TextField employeeAgeField = createTextField("Age");
+        TextField employeeEmailField = createTextField("Email");
 
-        TextField employeeIdField = createTextField("员工ID");
-        TextField employeeNameField = createTextField("姓名");
-        TextField employeeSexField = createTextField("性别(H/F)");
-        TextField employeeAgeField = createTextField("年龄");
-        TextField employeeEmailField = createTextField("电子邮件");
-
-        Button addEmployeeButton = new Button("添加员工");
+        Button addEmployeeButton = new Button("Ajouter");
         addEmployeeButton.setOnAction(e -> {
             String alertMessage = null;
             try {
                 String idText = employeeIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                    throw new IllegalArgumentException("L'ID ne peut pas être nul ou vide.");
                 }
 
                 String ageText = employeeAgeField.getText();
@@ -150,11 +145,10 @@ public class gestion extends Application {
 
                 gestionEmplo gestionEmplo = new gestionEmplo(db);
                 gestionEmplo.addEmployee(id, nom, sexe, age, email);
-                // 显示成功提示
-                alertMessage = "员工已成功添加！";
+
+                alertMessage = "L'employé a été ajouté avec succès ！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
-                // 清空输入框
                 employeeIdField.clear();
                 employeeNameField.clear();
                 employeeSexField.clear();
@@ -162,57 +156,57 @@ public class gestion extends Application {
                 employeeEmailField.clear();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Format d'ID non valide, veuillez saisir un numéro.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "添加员工时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de l'ajout d'un employé: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
 
         VBox layout = new VBox(10, employeeIdField, employeeNameField, employeeSexField, employeeAgeField, employeeEmailField, addEmployeeButton);
-        layout.setPadding(new Insets(20)); // 设置内边距
-        layout.setAlignment(Pos.CENTER); // 居中对齐
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         return layout;
     }
 
+
     private VBox deleteEmployeeModule() {
-        Label employeeIdLabel = new Label("员工id:");
+        Label employeeIdLabel = new Label("ID de l'employé: ");
         TextField employeeIdField = createTextField("");
 
-        Button deleteEmployeeButton = new Button("删除员工");
+        Button deleteEmployeeButton = new Button("Suppression");
 
         deleteEmployeeButton.setOnAction(e -> {
             String alertMessage = null;
             try {
                 String idText = employeeIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                    throw new IllegalArgumentException("L'ID ne peut pas être nul ou vide.");
                 }
 
                 int id = Integer.parseInt(idText);
 
-                // 调用 GestionEmplo 的 addEmployee 方法
                 gestionEmplo gestionEmplo = new gestionEmplo(db);
                 gestionEmplo.deleteEmployee(id);
 
-                alertMessage = "已成功删除！";
+                alertMessage = "Supprimé avec succès！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
                 employeeIdField.clear();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Format d'ID non valide, veuillez saisir un nombre.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning!", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "删除员工时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de la suppression d'un employé: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
@@ -222,21 +216,22 @@ public class gestion extends Application {
         return layout;
     }
 
-    private VBox updateEmployeeModule() {
-        Label employeeIdLabel = new Label("PS: 员工ID不能修改: ");
-        TextField employeeIdField = createTextField("员工ID");
-        TextField employeeNameField = createTextField("修改姓名");
-        TextField employeeSexField = createTextField("修改性别(H/F)");
-        TextField employeeAgeField = createTextField("修改年龄");
-        TextField employeeEmailField = createTextField("修改邮箱");
 
-        Button updateEmployeeButton = new Button("修改信息");
+    private VBox updateEmployeeModule() {
+        Label employeeIdLabel = new Label("PS: L'ID de l'employé ne peut pas être modifié: ");
+        TextField employeeIdField = createTextField("ID de l'employé");
+        TextField employeeNameField = createTextField("Modifier le nom");
+        TextField employeeSexField = createTextField("Modifier le sexe(H/F)");
+        TextField employeeAgeField = createTextField("Modifier l'âge");
+        TextField employeeEmailField = createTextField("Modifier l'email");
+
+        Button updateEmployeeButton = new Button("Modifier");
         updateEmployeeButton.setOnAction(e -> {
             String alertMessage = null;
             try {
                 String idText = employeeIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                    throw new IllegalArgumentException("L'ID ne peut pas être nul ou vide.");
                 }
                 int id = Integer.parseInt(idText);
                 String newName = employeeNameField.getText();
@@ -245,11 +240,10 @@ public class gestion extends Application {
                 String newEmail = employeeEmailField.getText();
                 int newAge = Integer.parseInt(newAgetext);
 
-                // 调用 GestionEmplo 的 addEmployee 方法
                 gestionEmplo gestionEmplo = new gestionEmplo(db);
                 gestionEmplo.updateEmployee(id, newName, newSex, newAge, newEmail);
 
-                alertMessage = "员工信息已成功修改！";
+                alertMessage = "Les informations sur les employés ont été modifiées avec succès！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
                 employeeNameField.clear();
@@ -258,20 +252,20 @@ public class gestion extends Application {
                 employeeEmailField.clear();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Le format de l'ID n'est pas valide, veuillez saisir un numéro.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "修改员工信息时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de la modification des informations sur l'employé: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
 
         });
         VBox layout = new VBox(10, employeeIdField, employeeIdLabel, employeeNameField, employeeSexField, employeeAgeField, employeeEmailField, updateEmployeeButton);
-        layout.setPadding(new Insets(20)); // 设置内边距
-        layout.setAlignment(Pos.CENTER); // 居中对齐
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
         return layout;
     }
 
@@ -289,7 +283,7 @@ public class gestion extends Application {
         TableColumn<employee, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        TableColumn<employee, String> projetColumn = new TableColumn<>("已完成项目");
+        TableColumn<employee, String> projetColumn = new TableColumn<>("Projets terminé");
         projetColumn.setCellValueFactory(data -> {
             employee emp = data.getValue();
             try {
@@ -298,11 +292,10 @@ public class gestion extends Application {
                 return new SimpleStringProperty(projet);
             } catch (SQLException ex) {
                 ex.printStackTrace();
-                return new SimpleStringProperty("加载失败");
+                return new SimpleStringProperty("Échec du chargement");
             }
         });
 
-        // 将列添加到表格中
         employeeTableView.getColumns().addAll(idColumn, nameColumn, sexColumn, ageColumn, emailColumn, projetColumn);
 
         gestionEmplo employeeManager = new gestionEmplo(db);
@@ -310,33 +303,31 @@ public class gestion extends Application {
             employeeManager.listEmployee(employeeTableView);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            employeeTableView.getItems().add(new employee(-1, "无法加载员工列表", "", -1, ""));
+            employeeTableView.getItems().add(new employee(-1, "Impossible de charger la liste du personnel", "", -1, ""));
         }
 
         return new VBox(employeeTableView);
     }
 
-    // 创建添加项目的布局
+
     private VBox addProjetModule() {
-        // 创建 gestionProjet 的实例
         gestionProjet projetManager = new gestionProjet(db);
 
-        // 创建文本框
-        TextField projetIdField = createTextField("项目id");
-        TextField projetNameField = createTextField("项目名称");
-        TextField projetGroupField = createTextField("项目小组");
-        TextField projetDdlField = createTextField("项目截止时间 (YYYY-MM-DD)");
+        TextField projetIdField = createTextField("ID du projet");
+        TextField projetNameField = createTextField("Nom du projet");
+        TextField projetGroupField = createTextField("Groupe du projet");
+        TextField projetDdlField = createTextField("Deadline(YYYY-MM-DD)");
         ComboBox<String> projetStatusComboBox = new ComboBox<>();
-        projetStatusComboBox.getItems().addAll("待办", "进行中", "已完成");
-        projetStatusComboBox.setPromptText("选择项目状态");
+        projetStatusComboBox.getItems().addAll("À faire", "En cours", "Terminé");
+        projetStatusComboBox.setPromptText("Sélectionner le statut du projet");
 
-        Label instructions = new Label("按住 Ctrl/Cmd 或 Shift 键以多选员工");
-        // 创建员工选择 ListView
+        Label instructions = new Label("Maintenez la touche Ctrl/Cmd ou Shift enfoncée pour effectuer une sélection multiple des employés.");
+
         ListView<String> employeeListView = new ListView<>();
         employeeListView.setPrefWidth(300);
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
-        // 假设从数据库获取员工名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
@@ -348,8 +339,7 @@ public class gestion extends Application {
         }
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // 创建添加项目按钮
-        Button addProjetButton = new Button("添加项目");
+        Button addProjetButton = new Button("Ajouter");
         addProjetButton.setOnAction(e -> {
             String alertMessage = null;
             try {
@@ -359,84 +349,77 @@ public class gestion extends Application {
                 String ddl = projetDdlField.getText();
                 String status = projetStatusComboBox.getValue();
 
-                // 获取选中的员工ID
                 List<Integer> selectedMemberIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
-                    // 通过员工姓名获取员工ID
-                    int selectedEmployeeId = projetManager.getEmployeeId(employeeName); // 获取员工ID
+                    int selectedEmployeeId = projetManager.getEmployeeId(employeeName);
                     if (selectedEmployeeId != -1) {
                         selectedMemberIds.add(selectedEmployeeId);
                     }
                 }
 
-                // 调用添加项目的方法
                 projetManager.addProjet(id, name, group, ddl, status, selectedMemberIds);
 
-                alertMessage = "项目已成功添加！";
+                alertMessage = "Le projet a été ajouté avec succès";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
-                // 清空输入框
+
                 projetIdField.clear();
                 projetNameField.clear();
                 projetGroupField.clear();
                 projetDdlField.clear();
                 projetStatusComboBox.setValue(null);
-                employeeListView.getSelectionModel().clearSelection();// 清空选中的员工
+                employeeListView.getSelectionModel().clearSelection();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Format d'ID non valide, veuillez saisir un nombre.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "添加项目时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de l'ajout d'un élément: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
 
-        // 创建布局并返回
-        VBox layout = new VBox(10, projetIdField, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, instructions, new Label("项目成员:"), employeeListView, addProjetButton);
-        layout.setPadding(new Insets(20)); // 设置内边距
+        VBox layout = new VBox(10, projetIdField, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, instructions, new Label("Membres du projet: "), employeeListView, addProjetButton);
+        layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
         return layout;
     }
 
     private VBox deleteProjetModule() {
-        Label projetIdLabel = new Label("项目id:");
+        Label projetIdLabel = new Label("ID du projet:");
         TextField projetIdField = createTextField("");
 
-        Button deleteProjetButton = new Button("删除项目");
-        //Label messageLabel = new Label();弹出窗口显示执行结果
+        Button deleteProjetButton = new Button("Supprimer");
         deleteProjetButton.setOnAction(e -> {
             String alertMessage = null;
             try {
-                String idText = projetIdField.getText(); // projetIdField 是输入项目 ID 的 TextField
+                String idText = projetIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("项目ID不能为空。");
+                    throw new IllegalArgumentException("L'ID de l'élément ne peut pas être nul.");
                 }
 
                 int projetId = Integer.parseInt(idText);
 
-                // 调用 deleteProjet 方法
                 gestionProjet gestionProjet = new gestionProjet(db);
                 gestionProjet.deleteProjet(projetId);
 
-                // 显示成功提示
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                alertMessage = "项目已成功删除！";
+                alertMessage = "Le project a été supprimé avec succès !";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
-                // 清空输入框
+
                 projetIdField.clear();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
-                showAlert(Alert.AlertType.ERROR, "错误", alertMessage);
+                alertMessage = "Format d'ID non valide, veuillez saisir un numéro.";
+                showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
-                showAlert(Alert.AlertType.WARNING, "警告", alertMessage);
+                showAlert(Alert.AlertType.WARNING, "Warning!", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "删除项目时发生错误: " + ex.getMessage();
-                showAlert(Alert.AlertType.ERROR, "错误", alertMessage);
+                alertMessage = "Une erreur s'est produite lors de la suppression d'un élément: " + ex.getMessage();
+                showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
 
         });
@@ -449,20 +432,20 @@ public class gestion extends Application {
     private VBox updateProjetModule() {
         gestionProjet projetManager = new gestionProjet(db);
 
-        Label projetIdLabel = new Label("PS: 项目ID不能修改: ");
-        TextField projetIdField = createTextField("项目ID");
-        TextField projetNameField = createTextField("修改项目名称");
-        TextField projetGroupField = createTextField("项目小组");
-        TextField projetDdlField = createTextField("修改截止日期 (YYYY-MM-DD)");
+        Label projetIdLabel = new Label("PS: L'ID du projet ne peut pas être modifié: ");
+        TextField projetIdField = createTextField("ID du projet");
+        TextField projetNameField = createTextField("Modifier le nom du projet");
+        TextField projetGroupField = createTextField("Groupe du projet");
+        TextField projetDdlField = createTextField("Deadline(YYYY-MM-DD)");
         ComboBox<String> projetStatusComboBox = new ComboBox<>();
-        projetStatusComboBox.getItems().addAll("待办", "进行中", "已完成");
-        projetStatusComboBox.setPromptText("选择项目状态");
+        projetStatusComboBox.getItems().addAll("À faire", "En cours", "Terminé");
+        projetStatusComboBox.setPromptText("Sélection du statut du projet");
 
         ListView<String> employeeListView = new ListView<>();
         employeeListView.setPrefWidth(300);
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
-        // 假设从数据库获取员工名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
@@ -474,14 +457,13 @@ public class gestion extends Application {
         }
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Button updateProjetButton = new Button("修改项目信息");
-        //Label messageLabel = new Label();弹出窗口显示执行结果
+        Button updateProjetButton = new Button("Modifier");
         updateProjetButton.setOnAction(e -> {
             String alertMessage = null;
             try {
                 String idText = projetIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("ID cannot be null or empty.");
+                    throw new IllegalArgumentException("L'ID ne peut pas être nul ou vide.");
                 }
                 int id = Integer.parseInt(idText);
                 String newName = projetNameField.getText();
@@ -498,7 +480,7 @@ public class gestion extends Application {
                 }
                 projetManager.updateProjet(id, newName, newGroup, newDdltext, newStatus, memberIds);
 
-                alertMessage = "项目信息已成功修改！";
+                alertMessage = "Les informations sur le projet ont été modifiées avec succès！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
                 projetNameField.clear();
@@ -507,26 +489,25 @@ public class gestion extends Application {
                 projetStatusComboBox.getSelectionModel().clearSelection();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Le format de l'ID n'est pas valide, veuillez saisir un numéro.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "修改项目信息时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de la modification des informations du projet: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
         VBox layout = new VBox(10, projetIdField, projetIdLabel, projetNameField, projetGroupField, projetDdlField, projetStatusComboBox, employeeListView, updateProjetButton);
-        layout.setPadding(new Insets(20)); // 设置内边距
-        layout.setAlignment(Pos.CENTER); // 居中对齐
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
         return layout;
     }
 
     private VBox viewProjetModule() {
         TableView<projet> projetTableView = new TableView<>();
 
-        // 定义各个列
         TableColumn<projet, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -538,67 +519,59 @@ public class gestion extends Application {
 
         TableColumn<projet, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
-            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
+            LocalDate deadline = data.getValue().getDdl();
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "Pas de date limite");
         });
 
         TableColumn<projet, String> statusColumn = new TableColumn<>("Statut");
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // 定义成员列
         TableColumn<projet, String> memberColumn = new TableColumn<>("Membre");
         memberColumn.setCellValueFactory(data -> {
             projet project = data.getValue();
-            List<String> members = project.getMembers(); // 假设已经加载成员数据
+            List<String> members = project.getMembers();
             if (members == null || members.isEmpty()) {
                 return new SimpleStringProperty("无成员");
             }
-            // 将成员姓名拼接成一个字符串
+
             String memberNames = String.join(", ", members);
             return new SimpleStringProperty(memberNames);
         });
 
-
-        // 将所有列添加到表格中
         projetTableView.getColumns().addAll(idColumn, nameColumn, groupColumn, ddlColumn, statusColumn, memberColumn);
 
-        // 获取项目管理类的实例
         gestionProjet projetManager = new gestionProjet(db);
         try {
             projetManager.listProjet(projetTableView);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            projetTableView.getItems().add(new projet(-1, "无法加载成员列表", "", null, "", new ArrayList<>()));
+            projetTableView.getItems().add(new projet(-1, "Impossible de charger la liste des membres", "", null, "", new ArrayList<>()));
         }
 
         return new VBox(projetTableView);
     }
 
-    // 创建添加任务的布局
     private VBox addTacheModule() {
-
         gestionTache gestionTache = new gestionTache(db);
 
-        // 创建文本框
-        TextField tacheIdField = createTextField("任务id");
-        TextField tacheNameField = createTextField("任务名称");
-        TextField tacheDdlField = createTextField("截止日期 (YYYY-MM-DD)");
-        TextField tacheCategField = createTextField("任务类别");
+        TextField tacheIdField = createTextField("ID de la tâche");
+        TextField tacheNameField = createTextField("Nom de la tâche");
+        TextField tacheDdlField = createTextField("Deadline(YYYY-MM-DD)");
+        TextField tacheCategField = createTextField("Catégorie de la tâche");
         TextArea tacheDescriptionArea = new TextArea();
-        tacheDescriptionArea.setPromptText("任务注释（详细描述）");
+        tacheDescriptionArea.setPromptText("Commentaire sur la tâche (description détaillée)");
         tacheDescriptionArea.setPrefHeight(350);
         tacheDescriptionArea.setPrefWidth(200);
         tacheDescriptionArea.setMaxWidth(200);
         tacheDescriptionArea.setMinWidth(200);
-        Label ps = new Label("按住 Ctrl/Cmd 或 Shift 键进行多选");
+        Label ps = new Label("Maintenir la touche Ctrl/Cmd ou Shift enfoncée pour effectuer des sélections multiples");
 
-        // 创建员工选择 ListView
         ListView<String> employeeListView = new ListView<>();
         employeeListView.setPrefWidth(300);
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
-        // 假设从数据库获取员工名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
@@ -610,12 +583,11 @@ public class gestion extends Application {
         }
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // 创建项目选择 ListView
         ListView<String> projetListView = new ListView<>();
         projetListView.setPrefWidth(300);
         projetListView.setMaxWidth(300);
         projetListView.setMinWidth(300);
-        // 假设从数据库获取项目名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM projet");
              ResultSet rs = pstmt.executeQuery()) {
@@ -627,8 +599,7 @@ public class gestion extends Application {
         }
         projetListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // 创建添加任务按钮
-        Button addTacheButton = new Button("添加任务");
+        Button addTacheButton = new Button("Ajouter");
         addTacheButton.setOnAction(e -> {
             String alertMessage = null;
             try {
@@ -639,27 +610,23 @@ public class gestion extends Application {
                 String category = tacheCategField.getText();
                 String description = tacheDescriptionArea.getText();
 
-                // 获取选中的员工ID
                 List<Integer> selectedEmployeeIds = new ArrayList<>();
                 for (String employeeName : employeeListView.getSelectionModel().getSelectedItems()) {
-                    int employeeId = gestionTache.getEmployeeId(employeeName); // 假设有这个方法获取员工ID
+                    int employeeId = gestionTache.getEmployeeId(employeeName);
                     selectedEmployeeIds.add(employeeId);
                 }
 
-                // 获取选中的项目ID
                 List<Integer> selectedProjetIds = new ArrayList<>();
                 for (String projetName : projetListView.getSelectionModel().getSelectedItems()) {
-                    int projetId = gestionTache.getProjetId(projetName); // 假设有这个方法获取项目ID
+                    int projetId = gestionTache.getProjetId(projetName);
                     selectedProjetIds.add(projetId);
                 }
 
-                // 调用添加任务的方法
                 gestionTache.addTache(id, name, deadline, category, description, selectedEmployeeIds, selectedProjetIds);
 
-                alertMessage = "任务已成功添加！";
+                alertMessage = "La tâche a été ajoutée avec succès！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
-                // 清空输入框
                 tacheIdField.clear();
                 tacheNameField.clear();
                 tacheDdlField.clear();
@@ -669,20 +636,20 @@ public class gestion extends Application {
                 projetListView.getSelectionModel().clearSelection();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Format d'ID non valide, veuillez saisir un nombre.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "添加任务时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de l'ajout d'une tâche: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
 
         VBox layout = new VBox(10, tacheIdField, tacheNameField, tacheDdlField, tacheCategField, tacheDescriptionArea, ps,
-                new Label("分配员工:"), employeeListView,
-                new Label("属于项目:"), projetListView,
+                new Label("Affecter un employé:"), employeeListView,
+                new Label("Appartient au projet:"), projetListView,
                 addTacheButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
@@ -692,7 +659,7 @@ public class gestion extends Application {
 
     private VBox viewTacheModule() {
         TableView<tache> tacheTableView = new TableView<>();
-        // 定义各个列
+
         TableColumn<tache, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         TableColumn<tache, Integer> nameColumn = new TableColumn<>("Nom");
@@ -700,42 +667,39 @@ public class gestion extends Application {
 
         TableColumn<tache, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
-            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
+            LocalDate deadline = data.getValue().getDdl();
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "Pas de date limite");
         });
+
         TableColumn<tache, Integer> categColumn = new TableColumn<>("Categorie");
         categColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         TableColumn<tache, Integer> descripColumn = new TableColumn<>("Description");
         descripColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-        // 设置列的属性
-        TableColumn<tache, String> employeeNameColumn = new TableColumn<>("分配的员工");
+
+        TableColumn<tache, String> employeeNameColumn = new TableColumn<>("Employés affectés");
         employeeNameColumn.setCellValueFactory(data -> {
             List<String> employees = data.getValue().getEmployeeName();
-            return new SimpleStringProperty(employees != null ? String.join(", ", employees) : "无分配员工");
+            return new SimpleStringProperty(employees != null ? String.join(", ", employees) : "Employés non affectés");
         });
-        TableColumn<tache, String> projetNameColumn = new TableColumn<>("所属项目");
+        TableColumn<tache, String> projetNameColumn = new TableColumn<>("Projet affilié");
         projetNameColumn.setCellValueFactory(data -> {
             List<String> projets = data.getValue().getProjetName();
-            return new SimpleStringProperty(projets != null ? String.join(", ", projets) : "错误");
+            return new SimpleStringProperty(projets != null ? String.join(", ", projets) : "Error");
         });
 
         tacheTableView.getColumns().addAll(idColumn, nameColumn, ddlColumn, categColumn, descripColumn, employeeNameColumn, projetNameColumn);
 
-        // 加载数据
         gestionTache gestionTache = new gestionTache(db);
 
         loadData(tacheTableView, gestionTache, "id");
 
-        // 创建排序按钮
-        Button sortByIdButton = new Button("按 ID 排序");
-        Button sortByDeadlineButton = new Button("按 Deadline 排序");
+        Button sortByIdButton = new Button("Tri par ID");
+        Button sortByDeadlineButton = new Button("Tri par date limite");
 
-        // 按钮事件绑定
         sortByIdButton.setOnAction(event -> loadData(tacheTableView, gestionTache, "id"));
         sortByDeadlineButton.setOnAction(event -> loadData(tacheTableView, gestionTache, "deadline"));
 
-        // 布局设置
         HBox buttonBox = new HBox(10, sortByIdButton, sortByDeadlineButton);
         VBox layout = new VBox(10, buttonBox, tacheTableView);
         layout.setPadding(new Insets(10));
@@ -749,34 +713,34 @@ public class gestion extends Application {
             tacheTableView.getItems().addAll(taches);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            tacheTableView.getItems().add(new tache(-1, "无法加载任务信息", null, "", "", new ArrayList<>(), new ArrayList<>()));
+            tacheTableView.getItems().add(new tache(-1, "Impossible de charger les informations sur les tâches", null, "", "", new ArrayList<>(), new ArrayList<>()));
         }
     }
 
     private VBox updateTacheModule() {
         gestionTache tacheManager = new gestionTache(db);
-        // 标签和输入框
-        Label tacheIdLabel = new Label("PS: 任务ID不能修改");
-        Label tacheEmployeeLabel = new Label("修改分配员工：");
-        Label tacheProjetLabel = new Label("修改所属项目：");
-        Label ps = new Label("按住 Ctrl/Cmd 或 Shift 键进行多选");
-        TextField tacheIdField = createTextField("任务ID");
 
-        TextField tacheNameField = createTextField("修改任务名称");
-        TextField tacheCategoryField = createTextField("修改任务类别");
-        TextField tacheDdlField = createTextField("修改截止日期 (YYYY-MM-DD)");
+        Label tacheIdLabel = new Label("PS: L'ID de tâche ne peut pas être modifié");
+        Label tacheEmployeeLabel = new Label("Modifier l'employé assigné：");
+        Label tacheProjetLabel = new Label("Modifier le projet auquel elle appartient：");
+        Label ps = new Label("Maintenir la touche Ctrl/Cmd ou Shift enfoncée pour effectuer des sélections multiples");
+        TextField tacheIdField = createTextField("ID de la tâche");
+
+        TextField tacheNameField = createTextField("Modifier le nom de la tâche");
+        TextField tacheCategoryField = createTextField("Modifier la catégorie de la tâche");
+        TextField tacheDdlField = createTextField("Modifier deadline(YYYY-MM-DD)");
         TextArea tacheDescriptionArea = new TextArea();
-        tacheDescriptionArea.setPromptText("修改任务描述");
+        tacheDescriptionArea.setPromptText("Modifier la description de la tâche");
         tacheDescriptionArea.setPrefHeight(350);
         tacheDescriptionArea.setPrefWidth(200);
         tacheDescriptionArea.setMaxWidth(200);
-        tacheDescriptionArea.setMinWidth(200);// 设置多行文本区域高度
+        tacheDescriptionArea.setMinWidth(200);
 
         ListView<String> employeeListView = new ListView<>();
         employeeListView.setPrefWidth(300);
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
-        // 假设从数据库获取员工名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
@@ -792,7 +756,7 @@ public class gestion extends Application {
         projectListView.setPrefWidth(300);
         projectListView.setMaxWidth(300);
         projectListView.setMinWidth(300);
-        // 假设从数据库获取项目名称
+
         try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM projet");
              ResultSet rs = pstmt.executeQuery()) {
@@ -804,14 +768,13 @@ public class gestion extends Application {
         }
         projectListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // 按钮
-        Button updateTacheButton = new Button("修改任务信息");
+        Button updateTacheButton = new Button("Modifier");
         updateTacheButton.setOnAction(e -> {
             String alertMessage = null;
             try {
                 String idText = tacheIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("ID不能为空。");
+                    throw new IllegalArgumentException("L'ID ne peut pas être nul.");
                 }
                 int id = Integer.parseInt(idText);
 
@@ -838,10 +801,9 @@ public class gestion extends Application {
 
                 tacheManager.updateTache(id, newName, newDdltext, newCategory, newDescription, employeeIds, projectIds);
 
-                alertMessage = "任务信息已成功修改！";
+                alertMessage = "Les informations relatives à la tâche ont été modifiées avec succès！";
                 showAlert(Alert.AlertType.INFORMATION, "", alertMessage);
 
-                // 清空输入框
                 tacheNameField.clear();
                 tacheCategoryField.clear();
                 tacheDdlField.clear();
@@ -850,68 +812,58 @@ public class gestion extends Application {
                 projectListView.getSelectionModel().clearSelection();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
+                alertMessage = "Le format de l'ID n'est pas valide, veuillez saisir un numéro.";
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
                 showAlert(Alert.AlertType.WARNING, "Warning！", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "修改任务信息时发生错误: " + ex.getMessage();
+                alertMessage = "Une erreur s'est produite lors de la modification des informations de la tâche: " + ex.getMessage();
                 showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
 
-        // 布局
         VBox layout = new VBox(10, tacheIdField, tacheIdLabel, tacheNameField, tacheDdlField, tacheCategoryField, tacheDescriptionArea, ps, tacheEmployeeLabel, employeeListView, tacheProjetLabel, projectListView, updateTacheButton);
-        layout.setPadding(new Insets(20)); // 设置内边距
-        layout.setAlignment(Pos.CENTER); // 居中对齐
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
         return layout;
     }
 
     private VBox deleteTacheModule() {
-        gestionTache tacheManager = new gestionTache(db);
-
-        // 输入任务 ID 的文本框
-        Label tacheIdLabel = new Label("任务id:");
+        Label tacheIdLabel = new Label("ID du tâche:");
         TextField tacheIdField = createTextField("");
-        Button deleteTacheButton = new Button("删除任务");
-
-        // 按钮点击事件
+        Button deleteTacheButton = new Button("Supprimer");
 
         deleteTacheButton.setOnAction(e -> {
             String alertMessage = null;
             try {
-                String idText = tacheIdField.getText(); // tacheIdField 是输入任务 ID 的 TextField
+                String idText = tacheIdField.getText();
                 if (idText == null || idText.trim().isEmpty()) {
-                    throw new IllegalArgumentException("任务ID不能为空。");
+                    throw new IllegalArgumentException("L'identifiant de la tâche ne doit pas être nul.");
                 }
 
                 int tacheId = Integer.parseInt(idText);
 
-                // 调用 deleteTache 方法
                 gestionTache gestionTache = new gestionTache(db);
                 gestionTache.deleteTache(tacheId);
 
-                // 显示成功提示
-                alertMessage = "已成功删除！";
-                showAlert(Alert.AlertType.INFORMATION, "成功", alertMessage);
+                alertMessage = "La tâche a été supprimée avec succès！";
+                showAlert(Alert.AlertType.INFORMATION, "Réussi", alertMessage);
 
-                // 清空输入框
                 tacheIdField.clear();
 
             } catch (NumberFormatException ex) {
-                alertMessage = "ID 格式无效，请输入数字。";
-                showAlert(Alert.AlertType.ERROR, "错误", alertMessage);
+                alertMessage = "Format d'identifiant non valide, veuillez saisir un numéro.";
+                showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             } catch (IllegalArgumentException ex) {
                 alertMessage = ex.getMessage();
-                showAlert(Alert.AlertType.WARNING, "警告", alertMessage);
+                showAlert(Alert.AlertType.WARNING, "Warning", alertMessage);
             } catch (Exception ex) {
-                alertMessage = "删除任务时发生错误: " + ex.getMessage();
-                showAlert(Alert.AlertType.ERROR, "错误", alertMessage);
+                alertMessage = "Erreur lors de la suppression de la tâche: " + ex.getMessage();
+                showAlert(Alert.AlertType.ERROR, "Error", alertMessage);
             }
         });
 
-        // 布局
         VBox layout = new VBox(10, tacheIdLabel, tacheIdField, deleteTacheButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
@@ -919,20 +871,12 @@ public class gestion extends Application {
         return layout;
     }
 
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
 
     private BorderPane viewKanbanModule() {
         BorderPane kanbanLayout = new BorderPane();
-        HBox kanbanColumns = new HBox(10); // 看板列容器
+        HBox kanbanColumns = new HBox(10);
 
-        String[] statuses = {"待办", "进行中", "已完成"};
+        String[] statuses = {"À faire", "En cours", "Terminé"};
         gestionProjet projetManager = new gestionProjet(db);
 
         for (String status : statuses) {
@@ -946,13 +890,11 @@ public class gestion extends Application {
             column.getChildren().add(columnHeader);
 
             try {
-                // 获取数据库中的项目列表
                 List<projet> projets = projetManager.getProjets(status);
                 for (projet proj : projets) {
                     Button projectButton = new Button(proj.getName());
                     projectButton.setMaxWidth(Double.MAX_VALUE);
 
-                    // 点击事件，显示表格
                     projectButton.setOnAction(e -> showProjetDetails(proj));
 
                     column.getChildren().add(projectButton);
@@ -982,99 +924,99 @@ public class gestion extends Application {
 
         TableColumn<projet, String> ddlColumn = new TableColumn<>("Deadline");
         ddlColumn.setCellValueFactory(data -> {
-            LocalDate deadline = data.getValue().getDdl(); // 假设 getDdl() 返回 LocalDate
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 你可以选择其他格式
-            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "无截止日期");
+            LocalDate deadline = data.getValue().getDdl();
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return new SimpleStringProperty(deadline != null ? deadline.format(dateFormat) : "Pas de date de limite");
         });
 
-        TableColumn<projet, String> membersColumn = new TableColumn<>("成员");
+        TableColumn<projet, String> membersColumn = new TableColumn<>("Members");
         membersColumn.setCellValueFactory(data -> {
             List<String> members = proj.getMembers();
-            return new SimpleStringProperty(members.isEmpty() ? "无成员" : String.join(", ", members));
+            return new SimpleStringProperty(members.isEmpty() ? "Pas de member" : String.join(", ", members));
         });
 
         projetTableView.getColumns().addAll(idColumn, nameColumn, groupColumn, ddlColumn, membersColumn);
         projetTableView.getItems().add(proj);
 
         Stage detailStage = new Stage();
-        detailStage.setTitle("项目详情");
+        detailStage.setTitle("Détails du projet");
         detailStage.setScene(new Scene(new VBox(projetTableView), 600, 400));
         detailStage.show();
     }
-    private void viewCalendar(Connection connection) {
-        Stage calendarStage = new Stage(); // 创建新窗口
-        calendarStage.setTitle("项目截止日期日历");
 
-        // 创建 DatePicker，用于选择日期
+
+    private void viewCalendar(Connection connection) {
+        Stage calendarStage = new Stage();
+        calendarStage.setTitle("Calendrier des dates limites de du projet");
+
         datePicker = new DatePicker(LocalDate.now());
         datePicker.setOnAction(e -> updateCalendar(connection, datePicker.getValue()));
 
-        // 创建日历视图
         calendarGrid = new GridPane();
-        calendarGrid.setVgap(5); // 设置行间距
-        calendarGrid.setHgap(5); // 设置列间距
+        calendarGrid.setVgap(5);
+        calendarGrid.setHgap(5);
 
-        // 设置每列和每行的大小
-        for (int i = 0; i < 7; i++) { // 7列（星期日到星期六）
-            calendarGrid.getColumnConstraints().add(new ColumnConstraints(80)); // 每列宽度为80像素
+        for (int i = 0; i < 7; i++) {
+            calendarGrid.getColumnConstraints().add(new ColumnConstraints(80));
         }
 
-        for (int i = 0; i < 6; i++) { // 6行（最多需要6行来显示所有日期）
-            calendarGrid.getRowConstraints().add(new RowConstraints(50)); // 每行高度为50像素
+        for (int i = 0; i < 6; i++) {
+            calendarGrid.getRowConstraints().add(new RowConstraints(50));
         }
 
-        // 创建布局
         VBox vbox = new VBox(datePicker, calendarGrid);
-        Scene calendarScene = new Scene(vbox, 600, 400); // 修改窗口大小
+        Scene calendarScene = new Scene(vbox, 600, 400);
         calendarStage.setScene(calendarScene);
         calendarStage.show();
 
-        // 初始更新日历
         updateCalendar(connection, datePicker.getValue());
     }
 
     private void updateCalendar(Connection connection, LocalDate selectedDate) {
-        // 清空之前的日历内容
         calendarGrid.getChildren().clear();
 
-        // 获取当前月份和年份
         YearMonth yearMonth = YearMonth.from(selectedDate);
-        int dayOfWeek = yearMonth.atDay(1).getDayOfWeek().getValue(); // 获取每月第一天的星期几
+        int dayOfWeek = yearMonth.atDay(1).getDayOfWeek().getValue();
         int daysInMonth = yearMonth.lengthOfMonth();
 
-        // 添加日历标题
-        String[] headers = {"日", "一", "二", "三", "四", "五", "六"};
+        String[] headers = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samdi"};
         for (int i = 0; i < headers.length; i++) {
-            calendarGrid.add(new Label(headers[i]), i, 0); // 添加星期标题
+            calendarGrid.add(new Label(headers[i]), i, 0);
         }
 
-        // 存储截止日期和项目名称
         Map<LocalDate, String> projectDeadlines = new HashMap<>();
 
-        // 从数据库获取项目数据并填充截止日期映射
-        String sql = "SELECT id, nom, deadline FROM projet"; // 假设这是你的项目表的SQL查询
+        String sql = "SELECT id, nom, deadline FROM projet";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 String name = rs.getString("nom");
-                LocalDate deadline = rs.getDate("deadline").toLocalDate(); // 将 java.sql.Date 转换为 LocalDate
+                LocalDate deadline = rs.getDate("deadline").toLocalDate();
                 projectDeadlines.put(deadline, name);
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // 处理异常
+            e.printStackTrace();
         }
 
-        // 填充日历日期
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate currentDate = LocalDate.of(yearMonth.getYear(), yearMonth.getMonth(), day);
-            String projectInfo = projectDeadlines.get(currentDate); // 获取对应的项目名称
+            String projectInfo = projectDeadlines.get(currentDate);
 
-            Label dateLabel = new Label(day + (projectInfo != null ? "\n" + projectInfo : "")); // 显示日期和项目名称
-            calendarGrid.add(dateLabel, (dayOfWeek - 1 + day) % 7, (day + dayOfWeek - 1) / 7 + 1); // 计算行和列
+            Label dateLabel = new Label(day + (projectInfo != null ? "\n" + projectInfo : ""));
+            calendarGrid.add(dateLabel, (dayOfWeek - 1 + day) % 7, (day + dayOfWeek - 1) / 7 + 1);
         }
     }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

@@ -10,7 +10,7 @@ public class tache {
     private LocalDate deadline;
     private String category;
     private String description;
-    private List<String> employeeName; // 存储分配的员工名称
+    private List<String> employeeName;
     private List<String> projetName;
 
     public tache(int id, String name, LocalDate deadline,String category,String description,List<String> employeeName,List<String> projetName) {

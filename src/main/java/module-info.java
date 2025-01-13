@@ -8,10 +8,10 @@ module fr.isep.ye.projet_algo_jjx {
     requires org.kordamp.bootstrapfx.core;
     requires java.sql;
     requires java.desktop;
-    requires kernel;
-    requires layout;
-    requires io;
-    requires org.bouncycastle.util;
+//    requires kernel;
+//    requires layout;
+//    requires io;
+//    requires org.bouncycastle.util;
 
     opens fr.isep.ye.projet_algo_jjx to javafx.fxml;
     exports fr.isep.ye.projet_algo_jjx;

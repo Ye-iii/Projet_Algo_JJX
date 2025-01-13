@@ -20,34 +20,32 @@ public class gestionProjet {
 
     public void addProjet(int id, String name, String group, String deadline, String status, List<Integer> members) throws SQLException {
         String projetDb = "INSERT INTO projet (id, nom, groupe, deadline, statut) VALUES (?, ?, ?, ?, ?)";
-        String pro_empDb = "INSERT INTO employee_projet (employee_id, projet_id) VALUES (?, ?)"; // 修改字段名为 projet_id
+        String pro_empDb = "INSERT INTO employee_projet (employee_id, projet_id) VALUES (?, ?)";
 
         try (Connection conn = mysql.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement pstmtProjet = conn.prepareStatement(projetDb);
                  PreparedStatement pstmtProemp = conn.prepareStatement(pro_empDb)) {
 
-                // 插入项目数据
                 pstmtProjet.setInt(1, id);
                 pstmtProjet.setString(2, name);
                 pstmtProjet.setString(3, group);
                 pstmtProjet.setString(4, deadline);
                 pstmtProjet.setString(5, status);
-                pstmtProjet.executeUpdate(); // 执行项目插入
+                pstmtProjet.executeUpdate();
 
-                // 插入员工与项目关联数据
                 for (Integer member : members) {
-                    pstmtProemp.setInt(1, member); // 设置员工ID
-                    pstmtProemp.setInt(2, id); // 设置项目ID
-                    pstmtProemp.addBatch(); // 添加到批处理
+                    pstmtProemp.setInt(1, member);
+                    pstmtProemp.setInt(2, id);
+                    pstmtProemp.addBatch();
                 }
-                pstmtProemp.executeBatch(); // 执行批处理插入
-                conn.commit(); // 提交事务
+                pstmtProemp.executeBatch();
+                conn.commit();
             } catch (SQLException ex) {
-                conn.rollback(); // 出现异常则回滚
-                throw ex; // 抛出异常
+                conn.rollback();
+                throw ex;
             } finally {
-                conn.setAutoCommit(true); // 重新设置为自动提交
+                conn.setAutoCommit(true);
             }
         }
     }
@@ -55,7 +53,7 @@ public class gestionProjet {
 
     public void listProjet(TableView<projet> tableView) throws SQLException {
         String query = "SELECT p.id AS projet_id, p.nom, p.groupe, p.deadline, p.statut, " +
-                "e.nom AS employee_name " + // 只选择成员姓名
+                "e.nom AS employee_name " +
                 "FROM projet p " +
                 "LEFT JOIN employee_projet ep ON p.id = ep.projet_id " +
                 "LEFT JOIN employee e ON ep.employee_id = e.id";
@@ -69,7 +67,6 @@ public class gestionProjet {
             while (rs.next()) {
                 int projetId = rs.getInt("projet_id");
 
-                // 如果项目未在 Map 中，创建并添加
                 projet proj = projetMap.computeIfAbsent(projetId, id -> {
                     try {
                         return new projet(
@@ -78,21 +75,19 @@ public class gestionProjet {
                                 rs.getString("groupe"),
                                 rs.getDate("deadline").toLocalDate(),
                                 rs.getString("statut"),
-                                new ArrayList<>() // 初始化成员列表
+                                new ArrayList<>()
                         );
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                 });
 
-                // 获取成员姓名并添加到项目的成员列表
                 String employeeName = rs.getString("employee_name");
-                if (employeeName != null) { // 确保有成员数据
-                    proj.getMembers().add(employeeName); // 添加成员姓名到项目中
+                if (employeeName != null) {
+                    proj.getMembers().add(employeeName);
                 }
             }
 
-            // 将所有项目添加到 TableView
             tableView.getItems().clear();
             tableView.getItems().addAll(projetMap.values());
         }
@@ -100,21 +95,20 @@ public class gestionProjet {
 
 
     public int getEmployeeId(String employeeName) {
-        String query = "SELECT id FROM employee WHERE nom = ?"; // 查询员工 ID 的 SQL 语句
-        try (Connection conn = db.getConnection(); // 获取数据库连接
+        String query = "SELECT id FROM employee WHERE nom = ?";
+        try (Connection conn = db.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, employeeName); // 设置查询参数为员工姓名
-            ResultSet rs = pstmt.executeQuery(); // 执行查询
+            pstmt.setString(1, employeeName);
+            ResultSet rs = pstmt.executeQuery();
 
-            // 如果找到结果，则返回员工 ID
             if (rs.next()) {
                 return rs.getInt("id");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace(); // 打印异常信息
+            ex.printStackTrace();
         }
-        return -1; // 如果没有找到，返回 -1
+        return -1;
     }
 
     public void deleteProjet(int projetId) throws SQLException {
@@ -123,31 +117,28 @@ public class gestionProjet {
         String deleteProjetEmployeeRelationSQL = "DELETE FROM employee_projet WHERE projet_id = ?";
 
         try (Connection conn = mysql.getConnection()) {
-            conn.setAutoCommit(false); // 开启事务
+            conn.setAutoCommit(false);
 
-            // 检查项目 ID 是否存在
             try (PreparedStatement checkStmt = conn.prepareStatement(checkProjetSQL)) {
                 checkStmt.setInt(1, projetId);
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next() && rs.getInt(1) == 0) {
-                        throw new IllegalArgumentException("未找到指定的项目ID: " + projetId);
+                        throw new IllegalArgumentException("L'ID de projet spécifié n'est pas trouvé: " + projetId);
                     }
                 }
             }
 
-            // 删除项目与员工的关联
             try (PreparedStatement pstmt = conn.prepareStatement(deleteProjetEmployeeRelationSQL)) {
                 pstmt.setInt(1, projetId);
                 pstmt.executeUpdate();
             }
 
-            // 删除项目本身
             try (PreparedStatement pstmt = conn.prepareStatement(deleteProjetSQL)) {
                 pstmt.setInt(1, projetId);
                 pstmt.executeUpdate();
             }
 
-            conn.commit(); // 提交事务
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
@@ -169,7 +160,6 @@ public class gestionProjet {
     }
 
     private void updateProjetMembers(int projetId, List<Integer> memberIds)throws SQLException {
-// 先删除当前项目的所有成员
         String deleteSql = "DELETE FROM employee_projet WHERE projet_id = ?";
         try (Connection conn = mysql.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
@@ -182,9 +172,9 @@ public class gestionProjet {
             for (Integer memberId : memberIds) {
                 pstmt.setInt(1, projetId);
                 pstmt.setInt(2, memberId);
-                pstmt.addBatch(); // 使用批处理添加插入命令
+                pstmt.addBatch();
             }
-            pstmt.executeBatch(); // 执行批处理
+            pstmt.executeBatch();
         }
     }
 
@@ -205,7 +195,6 @@ public class gestionProjet {
                 while (rs.next()) {
                     int projetId = rs.getInt("projet_id");
 
-                    // 如果项目未在 Map 中，创建并添加
                     projet proj = projetMap.computeIfAbsent(projetId, id -> {
                         try {
                             return new projet(
@@ -214,14 +203,13 @@ public class gestionProjet {
                                     rs.getString("groupe"),
                                     rs.getDate("deadline").toLocalDate(),
                                     rs.getString("statut"),
-                                    new ArrayList<>() // 初始化成员列表
+                                    new ArrayList<>()
                             );
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
                         }
                     });
 
-                    // 获取成员姓名并添加到项目的成员列表
                     String employeeName = rs.getString("employee_name");
                     if (employeeName != null) {
                         proj.getMembers().add(employeeName);
