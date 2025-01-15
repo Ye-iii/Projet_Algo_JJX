@@ -54,10 +54,11 @@ public class gestion extends Application {
         MenuItem viewCalendarItem = new MenuItem("Vue du calendrier");
         viewMenu.getItems().addAll(viewCalendarItem);
         viewCalendarItem.setOnAction(e -> {
-            try {
-                viewCalendar(mysql.getConnection());
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+            connection dbConnection = new mysql();
+            try (Connection connection = dbConnection.connect()) {
+                viewCalendar(dbConnection);
+            } catch (Exception ex) {
+                throw new RuntimeException("Error: " + ex.getMessage(), ex);
             }
         });
 
@@ -328,7 +329,8 @@ public class gestion extends Application {
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -337,6 +339,7 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         Button addProjetButton = new Button("Ajouter");
@@ -446,7 +449,8 @@ public class gestion extends Application {
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -455,6 +459,7 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         Button updateProjetButton = new Button("Modifier");
@@ -532,7 +537,7 @@ public class gestion extends Application {
             projet project = data.getValue();
             List<String> members = project.getMembers();
             if (members == null || members.isEmpty()) {
-                return new SimpleStringProperty("无成员");
+                return new SimpleStringProperty("Pas de membre");
             }
 
             String memberNames = String.join(", ", members);
@@ -572,7 +577,8 @@ public class gestion extends Application {
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -581,6 +587,8 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
+
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         ListView<String> projetListView = new ListView<>();
@@ -588,7 +596,7 @@ public class gestion extends Application {
         projetListView.setMaxWidth(300);
         projetListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM projet");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -597,6 +605,7 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
         projetListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         Button addTacheButton = new Button("Ajouter");
@@ -741,7 +750,8 @@ public class gestion extends Application {
         employeeListView.setMaxWidth(300);
         employeeListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM employee");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -750,6 +760,7 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
         employeeListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         ListView<String> projectListView = new ListView<>();
@@ -757,7 +768,7 @@ public class gestion extends Application {
         projectListView.setMaxWidth(300);
         projectListView.setMinWidth(300);
 
-        try (Connection conn = db.getConnection();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT nom FROM projet");
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -766,6 +777,8 @@ public class gestion extends Application {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
+
         projectListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         Button updateTacheButton = new Button("Modifier");
@@ -902,10 +915,8 @@ public class gestion extends Application {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
             kanbanColumns.getChildren().add(column);
         }
-
         kanbanLayout.setLeft(kanbanColumns);
         return kanbanLayout;
     }
@@ -945,12 +956,12 @@ public class gestion extends Application {
     }
 
 
-    private void viewCalendar(Connection connection) {
+    private void viewCalendar(connection dbConnection) {
         Stage calendarStage = new Stage();
         calendarStage.setTitle("Calendrier des dates limites de du projet");
 
         datePicker = new DatePicker(LocalDate.now());
-        datePicker.setOnAction(e -> updateCalendar(connection, datePicker.getValue()));
+        datePicker.setOnAction(e -> updateCalendar(dbConnection, datePicker.getValue()));
 
         calendarGrid = new GridPane();
         calendarGrid.setVgap(5);
@@ -969,10 +980,11 @@ public class gestion extends Application {
         calendarStage.setScene(calendarScene);
         calendarStage.show();
 
-        updateCalendar(connection, datePicker.getValue());
+        updateCalendar(dbConnection, datePicker.getValue());
     }
 
-    private void updateCalendar(Connection connection, LocalDate selectedDate) {
+
+    private void updateCalendar(connection dbConnection, LocalDate selectedDate) {
         calendarGrid.getChildren().clear();
 
         YearMonth yearMonth = YearMonth.from(selectedDate);
@@ -988,7 +1000,8 @@ public class gestion extends Application {
 
         String sql = "SELECT id, nom, deadline FROM projet";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+        try (Connection conn = dbConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {

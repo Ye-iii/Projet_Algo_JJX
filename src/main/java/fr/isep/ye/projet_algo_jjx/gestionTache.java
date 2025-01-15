@@ -19,7 +19,9 @@ public class gestionTache {
 
     public void addTache(int id, String name, String deadline, String category, String description, List<Integer> employeeIds, List<Integer> projetIds) throws SQLException {
         String sql = "INSERT INTO tache (id, nom, deadline, categorie, description) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.setString(2, name);
@@ -39,7 +41,9 @@ public class gestionTache {
 
     private void addTacheEmployee(int tacheId, int employeeId) throws SQLException {
         String sql = "INSERT INTO tache_employee (tache_id, employee_id) VALUES (?, ?)";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, tacheId);
             pstmt.setInt(2, employeeId);
@@ -49,7 +53,9 @@ public class gestionTache {
 
     private void addTacheProjet(int tacheId, int projetId) throws SQLException {
         String sql = "INSERT INTO tache_projet (tache_id, projet_id) VALUES (?, ?)";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, tacheId);
             pstmt.setInt(2, projetId);
@@ -59,7 +65,9 @@ public class gestionTache {
 
     public int getEmployeeId(String name) throws SQLException {
         String sql = "SELECT id FROM employee WHERE nom = ?";
-        try (Connection conn = db.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             ResultSet rs = pstmt.executeQuery();
@@ -73,7 +81,9 @@ public class gestionTache {
 
     public int getProjetId(String name) throws SQLException {
         String sql = "SELECT id FROM projet WHERE nom = ?";
-        try (Connection conn = db.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             ResultSet rs = pstmt.executeQuery();
@@ -93,7 +103,8 @@ public class gestionTache {
         String insertnewEmployeeSQL = "INSERT INTO tache_employee (tache_id, employee_id) VALUES (?, ?)";
         String insertnewProjetSQL = "INSERT INTO tache_projet (tache_id, projet_id) VALUES (?, ?)";
 
-        try (Connection conn = mysql.getConnection()) {
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect()){
             conn.setAutoCommit(false);
 
             try (PreparedStatement updateTacheStmt = conn.prepareStatement(updateTacheSQL)) {
@@ -160,7 +171,8 @@ public class gestionTache {
                 "LEFT JOIN projet p ON tp.projet_id = p.id " +
                 "GROUP BY t.id " + orderByClause;
 
-        try (Connection conn = mysql.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
@@ -191,7 +203,8 @@ public class gestionTache {
         String deleteTacheEmployeeRelationSQL = "DELETE FROM tache_employee WHERE tache_id = ?";
         String deleteTacheProjetRelationSQL = "DELETE FROM tache_projet WHERE tache_id = ?";
 
-        try (Connection conn = mysql.getConnection()) {
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect()){
             conn.setAutoCommit(false);
 
             try (PreparedStatement checkStmt = conn.prepareStatement(checkTacheSQL)) {
@@ -217,7 +230,6 @@ public class gestionTache {
                 pstmt.setInt(1, tacheId);
                 pstmt.executeUpdate();
             }
-
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();

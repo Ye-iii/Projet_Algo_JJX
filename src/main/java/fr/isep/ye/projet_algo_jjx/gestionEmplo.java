@@ -16,14 +16,19 @@ public class gestionEmplo {
 
     public void addEmployee(int id, String name, String sexe, int age, String email) throws SQLException {
         String sql = "INSERT INTO employee (id, nom, sexe, age, email) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1,id);
+            pstmt.setInt(1, id);
             pstmt.setString(2, name);
             pstmt.setString(3, sexe);
             pstmt.setInt(4, age);
             pstmt.setString(5, email);
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -32,9 +37,9 @@ public class gestionEmplo {
         String deleteEmployeeSQL = "DELETE FROM employee WHERE id = ?";
         String deleteProjetEmployeeRelationSQL = "DELETE FROM employee_projet WHERE employee_id = ?";
 
-        try (Connection conn = mysql.getConnection()) {
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect()) {
             conn.setAutoCommit(false);
-
             try (PreparedStatement checkStmt = conn.prepareStatement(checkEmployeeSQL)) {
                 checkStmt.setInt(1, employeeId);
                 try (ResultSet rs = checkStmt.executeQuery()) {
@@ -62,7 +67,9 @@ public class gestionEmplo {
     }
     public void updateEmployee(int id, String name, String sexe, int age, String email) throws SQLException {
         String sql = "UPDATE employee SET nom = ?, sexe = ?, age = ?, email = ? WHERE id = ?";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.setString(2, sexe);
@@ -70,13 +77,20 @@ public class gestionEmplo {
             pstmt.setString(4, email);
             pstmt.setInt(5, id);
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void listEmployee(TableView<employee> tableView) throws SQLException {
         String sql = "SELECT * FROM employee";
-        try (Connection conn = db.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
+
+
              ResultSet rs = pstmt.executeQuery()) {
             tableView.getItems().clear();
             while (rs.next()) {
@@ -95,18 +109,27 @@ public class gestionEmplo {
         String query = "SELECT p.nom FROM projet p " +
                 "JOIN employee_projet ep ON p.id = ep.projet_id " +
                 "WHERE ep.employee_id = ? AND p.statut = 'Terminé'";
-        PreparedStatement statement = db.getConnection().prepareStatement(query);
-        statement.setInt(1, employeeId);
-        ResultSet resultSet = statement.executeQuery();
 
         StringBuilder projet = new StringBuilder();
-        while (resultSet.next()) {
-            if (projet.length() > 0) {
-                projet.append(", ");
+        connection dbConnection = new mysql();
+
+        try (Connection conn = dbConnection.connect();
+             PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setInt(1, employeeId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    if (projet.length() > 0) {
+                        projet.append(", ");
+                    }
+                    projet.append(resultSet.getString("nom"));
+                }
             }
-            projet.append(resultSet.getString("nom"));
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
+
         return projet.length() > 0 ? projet.toString() : "Aucun projet terminé";
     }
-
 }

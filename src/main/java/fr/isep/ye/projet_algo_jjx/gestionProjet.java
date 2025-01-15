@@ -22,7 +22,8 @@ public class gestionProjet {
         String projetDb = "INSERT INTO projet (id, nom, groupe, deadline, statut) VALUES (?, ?, ?, ?, ?)";
         String pro_empDb = "INSERT INTO employee_projet (employee_id, projet_id) VALUES (?, ?)";
 
-        try (Connection conn = mysql.getConnection()) {
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect()) {
             conn.setAutoCommit(false);
             try (PreparedStatement pstmtProjet = conn.prepareStatement(projetDb);
                  PreparedStatement pstmtProemp = conn.prepareStatement(pro_empDb)) {
@@ -60,7 +61,10 @@ public class gestionProjet {
 
         Map<Integer, projet> projetMap = new HashMap<>();
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
+
+
              PreparedStatement pstmt = conn.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
 
@@ -96,9 +100,10 @@ public class gestionProjet {
 
     public int getEmployeeId(String employeeName) {
         String query = "SELECT id FROM employee WHERE nom = ?";
-        try (Connection conn = db.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
 
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, employeeName);
             ResultSet rs = pstmt.executeQuery();
 
@@ -116,7 +121,8 @@ public class gestionProjet {
         String deleteProjetSQL = "DELETE FROM projet WHERE id = ?";
         String deleteProjetEmployeeRelationSQL = "DELETE FROM employee_projet WHERE projet_id = ?";
 
-        try (Connection conn = mysql.getConnection()) {
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement checkStmt = conn.prepareStatement(checkProjetSQL)) {
@@ -147,7 +153,9 @@ public class gestionProjet {
 
     public void updateProjet(int id, String name, String group, String deadline, String status,List<Integer> memberIds) throws SQLException {
         String sql = "UPDATE projet SET nom = ?, groupe = ?, deadline = ?, statut = ? WHERE id = ?";
-        try (Connection conn = mysql.getConnection();
+
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.setString(2, group);
@@ -160,14 +168,19 @@ public class gestionProjet {
     }
 
     private void updateProjetMembers(int projetId, List<Integer> memberIds)throws SQLException {
+        connection dbConnection = new mysql();
+
         String deleteSql = "DELETE FROM employee_projet WHERE projet_id = ?";
-        try (Connection conn = mysql.getConnection();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
             pstmt.setInt(1, projetId);
             pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
+
         String insertSql = "INSERT INTO employee_projet (projet_id, employee_id) VALUES (?, ?)";
-        try (Connection conn = mysql.getConnection();
+        try (Connection conn = dbConnection.connect();
              PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
             for (Integer memberId : memberIds) {
                 pstmt.setInt(1, projetId);
@@ -175,6 +188,8 @@ public class gestionProjet {
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -188,7 +203,9 @@ public class gestionProjet {
 
         Map<Integer, projet> projetMap = new HashMap<>();
 
-        try (Connection conn = db.getConnection();
+        connection dbConnection = new mysql();
+        try (Connection conn = dbConnection.connect();
+
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, status);
             try (ResultSet rs = pstmt.executeQuery()) {
